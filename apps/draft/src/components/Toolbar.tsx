@@ -1,5 +1,7 @@
 import type { Editor } from '@tiptap/react';
 import { ToolbarButton, ToolbarSeparator } from '@gratis/ui';
+import { useRef } from 'react';
+import { readFileAsDataUrl } from '../editor/images';
 
 const FONT_FAMILIES = [
   'Arial',
@@ -32,6 +34,8 @@ export interface ToolbarProps {
 
 export function Toolbar({ editor }: ToolbarProps) {
   const disabled = !editor;
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const cellColorInputRef = useRef<HTMLInputElement>(null);
   const selectClass =
     'rounded border border-gray-300 bg-white px-1 py-0.5 text-sm disabled:opacity-50 dark:border-gray-600 dark:bg-gray-900';
 
@@ -339,6 +343,121 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor?.chain().focus().setHorizontalRule().run()}
       >
         ―
+      </ToolbarButton>
+      <ToolbarSeparator />
+
+      <ToolbarButton
+        aria-label="Insert table"
+        disabled={disabled}
+        onClick={() =>
+          editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+        }
+      >
+        ⊞
+      </ToolbarButton>
+      <ToolbarButton
+        aria-label="Add row below"
+        disabled={disabled || !editor?.isActive('table')}
+        onClick={() => editor?.chain().focus().addRowAfter().run()}
+      >
+        +R
+      </ToolbarButton>
+      <ToolbarButton
+        aria-label="Delete row"
+        disabled={disabled || !editor?.isActive('table')}
+        onClick={() => editor?.chain().focus().deleteRow().run()}
+      >
+        -R
+      </ToolbarButton>
+      <ToolbarButton
+        aria-label="Add column right"
+        disabled={disabled || !editor?.isActive('table')}
+        onClick={() => editor?.chain().focus().addColumnAfter().run()}
+      >
+        +C
+      </ToolbarButton>
+      <ToolbarButton
+        aria-label="Delete column"
+        disabled={disabled || !editor?.isActive('table')}
+        onClick={() => editor?.chain().focus().deleteColumn().run()}
+      >
+        -C
+      </ToolbarButton>
+      <ToolbarButton
+        aria-label="Merge cells"
+        disabled={disabled || !editor?.isActive('table')}
+        onClick={() => editor?.chain().focus().mergeCells().run()}
+      >
+        ⧉
+      </ToolbarButton>
+      <ToolbarButton
+        aria-label="Split cell"
+        disabled={disabled || !editor?.isActive('table')}
+        onClick={() => editor?.chain().focus().splitCell().run()}
+      >
+        ⧇
+      </ToolbarButton>
+      <ToolbarButton
+        aria-label="Toggle header row"
+        disabled={disabled || !editor?.isActive('table')}
+        onClick={() => editor?.chain().focus().toggleHeaderRow().run()}
+      >
+        ⇧R
+      </ToolbarButton>
+      <input
+        ref={cellColorInputRef}
+        aria-label="Cell shading color"
+        type="color"
+        className="h-6 w-6 cursor-pointer"
+        disabled={disabled || !editor?.isActive('table')}
+        defaultValue="#ffff88"
+        onChange={(e) =>
+          editor?.chain().focus().setCellAttribute('backgroundColor', e.target.value).run()
+        }
+      />
+      <ToolbarSeparator />
+
+      <ToolbarButton
+        aria-label="Insert image"
+        disabled={disabled}
+        onClick={() => imageInputRef.current?.click()}
+      >
+        🖼
+      </ToolbarButton>
+      <input
+        ref={imageInputRef}
+        data-testid="image-file-input"
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          e.target.value = '';
+          if (!file || !editor) return;
+          const src = await readFileAsDataUrl(file);
+          editor.chain().focus().setImage({ src, alt: file.name }).run();
+        }}
+      />
+      <ToolbarButton
+        aria-label="Align image left"
+        disabled={disabled || !editor?.isActive('image')}
+        onClick={() => editor?.chain().focus().updateAttributes('image', { align: 'left' }).run()}
+      >
+        ⇤🖼
+      </ToolbarButton>
+      <ToolbarButton
+        aria-label="Align image center"
+        disabled={disabled || !editor?.isActive('image')}
+        onClick={() => editor?.chain().focus().updateAttributes('image', { align: 'center' }).run()}
+      >
+        ↔🖼
+      </ToolbarButton>
+      <ToolbarButton
+        aria-label="Align image right"
+        disabled={disabled || !editor?.isActive('image')}
+        onClick={() => editor?.chain().focus().updateAttributes('image', { align: 'right' }).run()}
+      >
+        ⇥🖼
       </ToolbarButton>
     </div>
   );

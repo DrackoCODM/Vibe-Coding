@@ -7,6 +7,13 @@ import TaskList from '@tiptap/extension-task-list';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyleKit } from '@tiptap/extension-text-style/text-style-kit';
 import StarterKit from '@tiptap/starter-kit';
+import { ImageWithAlign } from './images';
+import {
+  TableCellWithShading,
+  TableHeaderWithShading,
+  TableRowExtension,
+  TableWithShading,
+} from './tables';
 
 export function getEditorExtensions(): Extensions {
   return [
@@ -21,5 +28,10 @@ export function getEditorExtensions(): Extensions {
     Superscript,
     TaskList,
     TaskItem.configure({ nested: true }),
+    TableWithShading.configure({ resizable: true }),
+    TableRowExtension,
+    TableCellWithShading,
+    TableHeaderWithShading,
+    ImageWithAlign.configure({ allowBase64: true, resize: { enabled: true } }),
   ];
 }

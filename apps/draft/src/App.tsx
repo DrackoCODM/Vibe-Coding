@@ -1,18 +1,51 @@
+import type { Editor } from '@tiptap/core';
 import { DRAFT_APP_NAME } from '@gratis/shared';
 import { useEditor } from '@tiptap/react';
+import type { EditorView } from '@tiptap/pm/view';
 import { useState } from 'react';
-import { getEditorExtensions } from './editor/extensions';
 import { EditorPage } from './components/EditorPage';
 import { MenuBar } from './components/MenuBar';
 import { StatusBar } from './components/StatusBar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Toolbar } from './components/Toolbar';
+import { getEditorExtensions } from './editor/extensions';
+import { imageFilesFromDataTransfer, isImageFile, readFileAsDataUrl } from './editor/images';
+
+type EditorViewWithEditor = EditorView & { editor: Editor };
+
+async function insertImageFiles(files: File[], insert: (src: string, alt: string) => void) {
+  for (const file of files) {
+    if (!isImageFile(file)) continue;
+    const src = await readFileAsDataUrl(file);
+    insert(src, file.name);
+  }
+}
 
 export function App() {
   const [darkMode, setDarkMode] = useState(false);
   const editor = useEditor({
     extensions: getEditorExtensions(),
     content: '',
+    editorProps: {
+      handlePaste(view, event) {
+        if (!event.clipboardData) return false;
+        const files = imageFilesFromDataTransfer(event.clipboardData);
+        if (files.length === 0) return false;
+        void insertImageFiles(files, (src, alt) => {
+          (view as EditorViewWithEditor).editor.chain().focus().setImage({ src, alt }).run();
+        });
+        return true;
+      },
+      handleDrop(view, event) {
+        if (!event.dataTransfer) return false;
+        const files = imageFilesFromDataTransfer(event.dataTransfer);
+        if (files.length === 0) return false;
+        void insertImageFiles(files, (src, alt) => {
+          (view as EditorViewWithEditor).editor.chain().focus().setImage({ src, alt }).run();
+        });
+        return true;
+      },
+    },
   });
 
   const toggleTheme = () => {
