@@ -26,12 +26,15 @@ describe('App shell', () => {
     expect(screen.getByLabelText('Page canvas').getAttribute('data-page-size')).toBe('letter');
   });
 
-  it('toggles the dark theme class on the html element', () => {
+  it('defaults to dark theme and toggles the dark class on the html element', () => {
+    localStorage.removeItem('gratisdraft.theme');
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(screen.getByRole('button', { name: 'Switch to light theme' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Switch to light theme' }));
     expect(document.documentElement.classList.contains('dark')).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 
   it('provides a rich text editing surface', async () => {

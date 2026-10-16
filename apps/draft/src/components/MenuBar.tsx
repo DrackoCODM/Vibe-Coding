@@ -42,7 +42,7 @@ export function MenuBar({ menus }: MenuBarProps) {
             aria-haspopup="menu"
             aria-expanded={openMenu === menu.label}
             className={`gratis-focus-ring rounded-md px-2.5 py-1 text-xs font-medium text-muted transition-colors duration-fast hover:bg-ink/5 hover:text-ink ${
-              openMenu === menu.label ? 'bg-ink/8 text-ink' : ''
+              openMenu === menu.label ? 'bg-ink/[0.08] text-ink' : ''
             }`}
             onClick={() => setOpenMenu(openMenu === menu.label ? null : menu.label)}
             onKeyDown={(e) => {
@@ -70,14 +70,15 @@ export function MenuBar({ menus }: MenuBarProps) {
                     }}
                   >
                     {item.icon && (
-                      <span className="flex w-4 shrink-0 justify-center text-muted" aria-hidden="true">
+                      <span
+                        className="flex w-4 shrink-0 justify-center text-muted"
+                        aria-hidden="true"
+                      >
                         {item.icon}
                       </span>
                     )}
                     <span className="flex-1">{item.label}</span>
-                    {item.shortcut && (
-                      <span className="text-2xs text-faint">{item.shortcut}</span>
-                    )}
+                    {item.shortcut && <span className="text-2xs text-faint">{item.shortcut}</span>}
                   </button>
                 </li>
               ))}

@@ -2,6 +2,21 @@ import type { Editor } from '@tiptap/core';
 import { DRAFT_APP_NAME } from '@gratis/shared';
 import { useEditor } from '@tiptap/react';
 import type { EditorView } from '@tiptap/pm/view';
+import {
+  FileDown,
+  FilePlus,
+  FileText,
+  FolderOpen,
+  Moon,
+  Printer,
+  Redo2,
+  Replace,
+  Save,
+  SaveAll,
+  Search,
+  Sun,
+  Undo2,
+} from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { EditorPage } from './components/EditorPage';
 import { FindBar } from './components/FindBar';
@@ -16,8 +31,11 @@ import { imageFilesFromDataTransfer, isImageFile, readFileAsDataUrl } from './ed
 import { countWords, getDocText, type WordStats } from './editor/stats';
 import { useFileHandlers } from './files/useFileHandlers';
 import { MARGIN_PRESETS } from './page/margins';
+import { applyTheme, readInitialDark } from './theme';
 
 type EditorViewWithEditor = EditorView & { editor: Editor };
+
+const menuIconProps = { size: 13 } as const;
 
 async function insertImageFiles(files: File[], insert: (src: string, alt: string) => void) {
   for (const file of files) {
@@ -28,7 +46,7 @@ async function insertImageFiles(files: File[], insert: (src: string, alt: string
 }
 
 export function App() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(readInitialDark);
   const [pageSetup, setPageSetup] = useState<PageSetup>({
     pageSize: 'a4',
     marginPreset: 'normal',
@@ -139,26 +157,68 @@ export function App() {
   const toggleTheme = () => {
     setDarkMode((prev) => {
       const next = !prev;
-      document.documentElement.classList.toggle('dark', next);
+      applyTheme(next);
       return next;
     });
   };
+
+  useEffect(() => {
+    applyTheme(darkMode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const menus = [
     {
       label: 'File',
       items: [
-        { label: 'New', shortcut: 'Ctrl+N', onSelect: files.newDocument },
-        { label: 'Open / Import…', shortcut: 'Ctrl+O', onSelect: () => void files.open() },
-        { label: 'Save', shortcut: 'Ctrl+S', onSelect: () => void files.save() },
-        { label: 'Save As…', shortcut: 'Ctrl+Shift+S', onSelect: () => void files.saveAs() },
-        { label: 'Export as Word (.docx)', onSelect: () => void files.exportAs('docx') },
-        { label: 'Export as Markdown (.md)', onSelect: () => void files.exportAs('md') },
-        { label: 'Export as HTML (.html)', onSelect: () => void files.exportAs('html') },
-        { label: 'Export as Plain text (.txt)', onSelect: () => void files.exportAs('txt') },
+        {
+          label: 'New',
+          shortcut: 'Ctrl+N',
+          icon: <FilePlus {...menuIconProps} />,
+          onSelect: files.newDocument,
+        },
+        {
+          label: 'Open / Import…',
+          shortcut: 'Ctrl+O',
+          icon: <FolderOpen {...menuIconProps} />,
+          onSelect: () => void files.open(),
+        },
+        {
+          label: 'Save',
+          shortcut: 'Ctrl+S',
+          icon: <Save {...menuIconProps} />,
+          onSelect: () => void files.save(),
+        },
+        {
+          label: 'Save As…',
+          shortcut: 'Ctrl+Shift+S',
+          icon: <SaveAll {...menuIconProps} />,
+          onSelect: () => void files.saveAs(),
+        },
+        {
+          label: 'Export as Word (.docx)',
+          icon: <FileDown {...menuIconProps} />,
+          onSelect: () => void files.exportAs('docx'),
+        },
+        {
+          label: 'Export as Markdown (.md)',
+          icon: <FileText {...menuIconProps} />,
+          onSelect: () => void files.exportAs('md'),
+        },
+        {
+          label: 'Export as HTML (.html)',
+          icon: <FileText {...menuIconProps} />,
+          onSelect: () => void files.exportAs('html'),
+        },
+        {
+          label: 'Export as Plain text (.txt)',
+          icon: <FileText {...menuIconProps} />,
+          onSelect: () => void files.exportAs('txt'),
+        },
         {
           label: 'Export as PDF (print)',
           shortcut: 'Ctrl+P',
+          icon: <Printer {...menuIconProps} />,
           onSelect: () => void files.exportAs('pdf'),
         },
       ],
@@ -169,6 +229,7 @@ export function App() {
         {
           label: 'Find',
           shortcut: 'Ctrl+F',
+          icon: <Search {...menuIconProps} />,
           onSelect: () => {
             setFindReplaceOpen(false);
             setFindOpen(true);
@@ -177,6 +238,7 @@ export function App() {
         {
           label: 'Replace',
           shortcut: 'Ctrl+H',
+          icon: <Replace {...menuIconProps} />,
           onSelect: () => {
             setFindReplaceOpen(true);
             setFindOpen(true);
@@ -185,26 +247,34 @@ export function App() {
         {
           label: 'Undo',
           shortcut: 'Ctrl+Z',
+          icon: <Undo2 {...menuIconProps} />,
           onSelect: () => editor?.chain().focus().undo().run(),
         },
         {
           label: 'Redo',
           shortcut: 'Ctrl+Y',
+          icon: <Redo2 {...menuIconProps} />,
           onSelect: () => editor?.chain().focus().redo().run(),
         },
       ],
     },
     {
       label: 'View',
-      items: [{ label: darkMode ? 'Light theme' : 'Dark theme', onSelect: toggleTheme }],
+      items: [
+        {
+          label: darkMode ? 'Light theme' : 'Dark theme',
+          icon: darkMode ? <Sun {...menuIconProps} /> : <Moon {...menuIconProps} />,
+          onSelect: toggleTheme,
+        },
+      ],
     },
   ];
 
   return (
-    <div className="flex h-screen flex-col bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-gray-100">
-      <header className="flex items-center gap-2 border-b border-gray-300 bg-white px-3 py-1 dark:border-gray-700 dark:bg-gray-900">
-        <span className="text-sm font-semibold">{DRAFT_APP_NAME}</span>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+    <div className="flex h-screen flex-col bg-surface text-ink">
+      <header className="flex h-9 shrink-0 items-center gap-2 border-b border-line bg-raised px-3">
+        <span className="text-xs font-semibold tracking-tight">{DRAFT_APP_NAME}</span>
+        <span className="max-w-64 truncate text-xs text-muted">
           {files.fileName}
           {files.dirty ? ' *' : ''}
         </span>
@@ -240,6 +310,7 @@ export function App() {
         charCount={stats.characters}
         currentPage={pageInfo.current}
         pageCount={pageInfo.total}
+        zoomPercent={pageSetup.zoomPercent}
       />
     </div>
   );

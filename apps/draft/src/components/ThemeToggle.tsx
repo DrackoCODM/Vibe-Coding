@@ -1,3 +1,5 @@
+import { Sun, Moon } from 'lucide-react';
+
 export interface ThemeToggleProps {
   dark: boolean;
   onToggle: () => void;
@@ -10,9 +12,10 @@ export function ThemeToggle({ dark, onToggle }: ThemeToggleProps) {
       aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
       aria-pressed={dark}
       onClick={onToggle}
-      className="rounded px-2 py-0.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+      title={dark ? 'Switch to light theme' : 'Switch to dark theme'}
+      className="gratis-focus-ring inline-flex h-7 w-7 items-center justify-center rounded-md text-muted transition-colors duration-fast hover:bg-ink/5 hover:text-ink"
     >
-      {dark ? 'Light' : 'Dark'}
+      {dark ? <Sun size={15} /> : <Moon size={15} />}
     </button>
   );
 }

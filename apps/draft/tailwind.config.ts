@@ -49,10 +49,8 @@ export default {
       },
       boxShadow: {
         elev1: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        elev2:
-          '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 4px 12px -2px rgb(0 0 0 / 0.08)',
-        elev3:
-          '0 4px 6px -1px rgb(0 0 0 / 0.07), 0 12px 28px -6px rgb(0 0 0 / 0.14)',
+        elev2: '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 4px 12px -2px rgb(0 0 0 / 0.08)',
+        elev3: '0 4px 6px -1px rgb(0 0 0 / 0.07), 0 12px 28px -6px rgb(0 0 0 / 0.14)',
         page: '0 0 0 1px rgb(0 0 0 / 0.04), 0 2px 6px rgb(0 0 0 / 0.06), 0 16px 40px -12px rgb(0 0 0 / 0.22)',
       },
       transitionDuration: {
