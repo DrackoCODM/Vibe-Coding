@@ -1,10 +1,11 @@
 export interface StatusBarProps {
   wordCount: number;
+  charCount?: number;
   currentPage: number;
   pageCount: number;
 }
 
-export function StatusBar({ wordCount, currentPage, pageCount }: StatusBarProps) {
+export function StatusBar({ wordCount, charCount, currentPage, pageCount }: StatusBarProps) {
   return (
     <footer
       aria-label="Status bar"
@@ -14,6 +15,7 @@ export function StatusBar({ wordCount, currentPage, pageCount }: StatusBarProps)
         Page {currentPage} of {pageCount}
       </span>
       <span data-testid="word-count">{wordCount} words</span>
+      {charCount !== undefined && <span data-testid="char-count">{charCount} characters</span>}
     </footer>
   );
 }

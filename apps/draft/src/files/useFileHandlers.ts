@@ -21,6 +21,27 @@ import { downloadBlob, pickFileToOpen, pickSaveDestination } from './io';
 
 const OPEN_ACCEPT = '.gdraft,.docx,.md,.markdown,.html,.htm,.txt,.text';
 const DEFAULT_NAME = `Untitled${GDRAFT_FILE_EXTENSION}`;
+export const AUTOSAVE_KEY = 'gratisdraft.autosave';
+const AUTOSAVE_DELAY_MS = 5000;
+
+/** Read the local auto-save draft, or null when missing/corrupt. */
+export function readAutoSave(): GdraftDocument | null {
+  try {
+    const raw = localStorage.getItem(AUTOSAVE_KEY);
+    return raw ? parseGdraft(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Persist a draft to local storage (best effort). */
+export function writeAutoSave(doc: GdraftDocument): void {
+  try {
+    localStorage.setItem(AUTOSAVE_KEY, serializeGdraft(doc));
+  } catch {
+    // storage full or unavailable — ignore
+  }
+}
 
 async function fileToText(file: File): Promise<string> {
   return file.text();
@@ -71,6 +92,44 @@ export function useFileHandlers(editor: Editor | null): FileHandlers {
       content: editor?.getJSON() ?? { type: 'doc', content: [{ type: 'paragraph' }] },
     };
   }, [editor, fileName]);
+
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (!editor || restoredRef.current) return;
+    restoredRef.current = true;
+    if (!editor.isEmpty) return;
+    const saved = readAutoSave();
+    if (saved) {
+      editor.commands.setContent(saved.content as Record<string, unknown>);
+      metaRef.current = { createdAt: saved.meta.createdAt };
+      setFileName(`${saved.meta.title || 'Untitled'}${GDRAFT_FILE_EXTENSION}`);
+      setDirty(false);
+    }
+  }, [editor]);
+
+  const buildGdraftRef = useRef(buildGdraft);
+  buildGdraftRef.current = buildGdraft;
+  useEffect(() => {
+    if (!editor || !dirty) return;
+    const timer = setTimeout(() => {
+      const doc = buildGdraftRef.current();
+      writeAutoSave(doc);
+      const handle = fileHandleRef.current;
+      if (handle) {
+        void (async () => {
+          try {
+            const writable = await handle.createWritable();
+            await writable.write(serializeGdraft(doc));
+            await writable.close();
+            setDirty(false);
+          } catch {
+            // auto-save to file failed — keep dirty, local copy already written
+          }
+        })();
+      }
+    }, AUTOSAVE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [dirty, editor]);
 
   const newDocument = useCallback(() => {
     editor?.commands.setContent({ type: 'doc', content: [{ type: 'paragraph' }] });

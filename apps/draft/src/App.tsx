@@ -2,8 +2,9 @@ import type { Editor } from '@tiptap/core';
 import { DRAFT_APP_NAME } from '@gratis/shared';
 import { useEditor } from '@tiptap/react';
 import type { EditorView } from '@tiptap/pm/view';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { EditorPage } from './components/EditorPage';
+import { FindBar } from './components/FindBar';
 import { MenuBar } from './components/MenuBar';
 import { PageSetupBar, type PageSetup } from './components/PageSetupBar';
 import { StatusBar } from './components/StatusBar';
@@ -11,6 +12,7 @@ import { ThemeToggle } from './components/ThemeToggle';
 import { Toolbar } from './components/Toolbar';
 import { getEditorExtensions } from './editor/extensions';
 import { imageFilesFromDataTransfer, isImageFile, readFileAsDataUrl } from './editor/images';
+import { countWords, getDocText, type WordStats } from './editor/stats';
 import { useFileHandlers } from './files/useFileHandlers';
 import { MARGIN_PRESETS } from './page/margins';
 
@@ -58,6 +60,69 @@ export function App() {
   });
 
   const files = useFileHandlers(editor);
+  const [findOpen, setFindOpen] = useState(false);
+  const [findReplaceOpen, setFindReplaceOpen] = useState(false);
+  const [stats, setStats] = useState<WordStats>({
+    words: 0,
+    characters: 0,
+    charactersNoSpaces: 0,
+  });
+
+  useEffect(() => {
+    if (!editor) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const update = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => setStats(countWords(getDocText(editor.state.doc))), 200);
+    };
+    update();
+    editor.on('update', update);
+    return () => {
+      clearTimeout(timer);
+      editor.off('update', update);
+    };
+  }, [editor]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey)) return;
+      const key = event.key.toLowerCase();
+      const handled = (): void => event.preventDefault();
+      switch (key) {
+        case 's':
+          handled();
+          if (event.shiftKey) void files.saveAs();
+          else void files.save();
+          break;
+        case 'o':
+          handled();
+          void files.open();
+          break;
+        case 'n':
+          handled();
+          files.newDocument();
+          break;
+        case 'p':
+          handled();
+          void files.exportAs('pdf');
+          break;
+        case 'f':
+          handled();
+          setFindReplaceOpen(false);
+          setFindOpen(true);
+          break;
+        case 'h':
+          handled();
+          setFindReplaceOpen(true);
+          setFindOpen(true);
+          break;
+        default:
+          break;
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [files]);
 
   const handlePageChange = useCallback((current: number, total: number) => {
     setPageInfo((prev) =>
@@ -96,6 +161,22 @@ export function App() {
       label: 'Edit',
       items: [
         {
+          label: 'Find',
+          shortcut: 'Ctrl+F',
+          onSelect: () => {
+            setFindReplaceOpen(false);
+            setFindOpen(true);
+          },
+        },
+        {
+          label: 'Replace',
+          shortcut: 'Ctrl+H',
+          onSelect: () => {
+            setFindReplaceOpen(true);
+            setFindOpen(true);
+          },
+        },
+        {
           label: 'Undo',
           shortcut: 'Ctrl+Z',
           onSelect: () => editor?.chain().focus().undo().run(),
@@ -127,6 +208,12 @@ export function App() {
         </div>
       </header>
       <Toolbar editor={editor} />
+      <FindBar
+        editor={editor}
+        open={findOpen}
+        showReplace={findReplaceOpen}
+        onClose={() => setFindOpen(false)}
+      />
       <PageSetupBar setup={pageSetup} onChange={setPageSetup} />
       <main className="flex-1 overflow-auto p-8">
         <EditorPage
@@ -137,7 +224,12 @@ export function App() {
           onPageChange={handlePageChange}
         />
       </main>
-      <StatusBar wordCount={0} currentPage={pageInfo.current} pageCount={pageInfo.total} />
+      <StatusBar
+        wordCount={stats.words}
+        charCount={stats.characters}
+        currentPage={pageInfo.current}
+        pageCount={pageInfo.total}
+      />
     </div>
   );
 }
