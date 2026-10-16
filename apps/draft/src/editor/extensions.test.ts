@@ -418,4 +418,19 @@ describe('document settings', () => {
     expect(xrefs[0].attrs.refLabel).toBe('bm1');
     expect(ed.getHTML()).toContain('data-xref');
   });
+
+  it('inserts a citation and refreshes the bibliography', () => {
+    const ed = createEditor('<p>Hello world</p>');
+    expect(ed.commands.insertCitation({ citeKey: 'doe2024', title: 'On Drafts, 2024' })).toBe(true);
+    expect(ed.getHTML()).toContain('data-citation');
+    expect(ed.commands.insertBibliography()).toBe(true);
+    expect(ed.getHTML()).toContain('data-bibliography');
+    expect(ed.commands.updateBibliography()).toBe(true);
+    const bibNodes: ProsemirrorNode[] = [];
+    ed.state.doc.descendants((node) => {
+      if (node.type.name === 'bibliography') bibNodes.push(node);
+    });
+    expect(bibNodes).toHaveLength(1);
+    expect(bibNodes[0].attrs.entries).toEqual([{ citeKey: 'doe2024', title: 'On Drafts, 2024' }]);
+  });
 });

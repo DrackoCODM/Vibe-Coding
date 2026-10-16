@@ -4,6 +4,7 @@ import { useEditor } from '@tiptap/react';
 import type { EditorView } from '@tiptap/pm/view';
 import {
   Bold,
+  BookMarked,
   Bookmark,
   FileDown,
   FilePlus,
@@ -15,6 +16,7 @@ import {
   Link2,
   ListEnd,
   ListTree,
+  Library,
   MessageSquare,
   Minus,
   Moon,
@@ -40,6 +42,7 @@ import { FindBar } from './components/FindBar';
 import { CommentsDialog } from './components/CommentsDialog';
 import { CharacterDialog } from './components/CharacterDialog';
 import { CrossRefDialog } from './components/CrossRefDialog';
+import { CitationDialog } from './components/CitationDialog';
 import { FootnotesDialog } from './components/FootnotesDialog';
 import { HeaderFooterDialog } from './components/HeaderFooterDialog';
 import { MenuBar } from './components/MenuBar';
@@ -123,6 +126,7 @@ export function App() {
   const [characterOpen, setCharacterOpen] = useState(false);
   const [crossRefOpen, setCrossRefOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [citationOpen, setCitationOpen] = useState(false);
   const [stats, setStats] = useState<WordStats>({
     words: 0,
     characters: 0,
@@ -161,11 +165,12 @@ export function App() {
 
   useEffect(() => {
     if (!editor) return;
-    // Keeps ToC blocks and cross-reference labels in sync; dispatches only
-    // when their cached data is stale, so this cannot loop.
+    // Keeps ToC blocks, cross-references and bibliography in sync; dispatches
+    // only when their cached data is stale, so this cannot loop.
     const updateDerived = () => {
       editor.commands.updateTableOfContents();
       updateCrossRefs(editor);
+      editor.commands.updateBibliography();
     };
     updateDerived();
     editor.on('update', updateDerived);
@@ -376,6 +381,16 @@ export function App() {
           icon: <Link2 {...menuIconProps} />,
           onSelect: () => setCrossRefOpen(true),
         },
+        {
+          label: 'Add citation…',
+          icon: <BookMarked {...menuIconProps} />,
+          onSelect: () => setCitationOpen(true),
+        },
+        {
+          label: 'Bibliography',
+          icon: <Library {...menuIconProps} />,
+          onSelect: () => editor?.commands.insertBibliography(),
+        },
         { label: 'sep-head', separator: true, onSelect: () => undefined },
         {
           label: 'Header and footer…',
@@ -555,6 +570,7 @@ export function App() {
       />
       <CrossRefDialog editor={editor} open={crossRefOpen} onClose={() => setCrossRefOpen(false)} />
       <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <CitationDialog editor={editor} open={citationOpen} onClose={() => setCitationOpen(false)} />
     </div>
   );
 }

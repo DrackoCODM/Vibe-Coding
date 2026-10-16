@@ -128,6 +128,26 @@ export async function blocksToDocx(
       case 'pageBreak':
         children.push(new Paragraph({ children: [new PageBreak()] }));
         break;
+      case 'bibliography': {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'Bibliography', bold: true, font: 'Calibri' })],
+          }),
+        );
+        block.entries.forEach((entry, index) => {
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `[${index + 1}] ${entry.title} (${entry.citeKey})`,
+                  font: 'Calibri',
+                }),
+              ],
+            }),
+          );
+        });
+        break;
+      }
       case 'horizontalRule':
         children.push(
           new Paragraph({

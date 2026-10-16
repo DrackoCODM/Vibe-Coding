@@ -134,6 +134,22 @@ describe('App shell', () => {
     expect(screen.getByLabelText('Document content').querySelector('[data-caption]')).toBeTruthy();
   });
 
+  it('adds a citation and a bibliography from the Insert menu', async () => {
+    const { container } = render(<App />);
+    fireEvent.click(screen.getByText('Insert'));
+    fireEvent.click(screen.getByText('Add citation…'));
+    expect(screen.getByTestId('citation-dialog')).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Citation key'), { target: { value: 'doe2024' } });
+    fireEvent.change(screen.getByLabelText('Citation title'), {
+      target: { value: 'On Drafts, 2024' },
+    });
+    fireEvent.click(screen.getByTestId('citation-dialog').querySelector('button.bg-accent')!);
+    expect(container.querySelector('[data-citation]')).toBeTruthy();
+    fireEvent.click(screen.getByText('Insert'));
+    fireEvent.click(screen.getByText('Bibliography'));
+    expect(container.querySelector('[data-bibliography]')).toBeTruthy();
+  });
+
   it('renders all six top-level menus', () => {
     render(<App />);
     for (const menu of ['File', 'Edit', 'Insert', 'Format', 'View', 'Help']) {

@@ -28,6 +28,7 @@ export type ExportBlock =
   | { type: 'listItem'; ordered: boolean; level: number; runs: TextRun[] }
   | { type: 'blockquote'; runs: TextRun[] }
   | { type: 'caption'; label: string; runs: TextRun[] }
+  | { type: 'bibliography'; entries: { citeKey: string; title: string }[] }
   | { type: 'pageBreak' }
   | { type: 'horizontalRule' }
   | { type: 'tableRow'; cells: string[][] };

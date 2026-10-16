@@ -1,6 +1,14 @@
 import type { ExportBlock, PmNodeLike, TextRun } from './types';
 
-function collectRuns(node: PmNodeLike, marks: Set<string> = new Set()): TextRun[] {
+interface CiteCounter {
+  n: number;
+}
+
+function collectRuns(
+  node: PmNodeLike,
+  marks: Set<string> = new Set(),
+  cites: CiteCounter = { n: 0 },
+): TextRun[] {
   const nextMarks = new Set(marks);
   for (const mark of node.marks ?? []) nextMarks.add(mark.type);
   if (node.type === 'text' && typeof node.text === 'string') {
@@ -31,7 +39,20 @@ function collectRuns(node: PmNodeLike, marks: Set<string> = new Set()): TextRun[
       },
     ];
   }
-  return (node.content ?? []).flatMap((child) => collectRuns(child, nextMarks));
+  if (node.type === 'citation') {
+    cites.n += 1;
+    return [
+      {
+        text: `[${cites.n}]`,
+        bold: false,
+        italic: false,
+        underline: false,
+        strike: false,
+        code: false,
+      },
+    ];
+  }
+  return (node.content ?? []).flatMap((child) => collectRuns(child, nextMarks, cites));
 }
 
 function joinRuns(runs: TextRun[]): TextRun[] {
@@ -63,15 +84,16 @@ function convertNode(
   node: PmNodeLike,
   listStack: { ordered: boolean; level: number }[],
   out: ExportBlock[],
+  cites: CiteCounter,
 ) {
   switch (node.type) {
     case 'heading': {
       const level = Number(node.attrs?.level ?? 1);
-      out.push({ type: 'heading', level, runs: joinRuns(collectRuns(node)) });
+      out.push({ type: 'heading', level, runs: joinRuns(collectRuns(node, new Set(), cites)) });
       break;
     }
     case 'paragraph': {
-      const runs = joinRuns(collectRuns(node));
+      const runs = joinRuns(collectRuns(node, new Set(), cites));
       if (isEmptyRuns(runs) && out.length > 0) break;
       if (listStack.length > 0) {
         const list = listStack[listStack.length - 1];
@@ -83,25 +105,25 @@ function convertNode(
     }
     case 'bulletList':
       for (const child of node.content ?? []) {
-        convertNode(child, [...listStack, { ordered: false, level: listStack.length }], out);
+        convertNode(child, [...listStack, { ordered: false, level: listStack.length }], out, cites);
       }
       break;
     case 'orderedList':
       for (const child of node.content ?? []) {
-        convertNode(child, [...listStack, { ordered: true, level: listStack.length }], out);
+        convertNode(child, [...listStack, { ordered: true, level: listStack.length }], out, cites);
       }
       break;
     case 'taskList':
       for (const child of node.content ?? []) {
-        convertNode(child, [...listStack, { ordered: false, level: listStack.length }], out);
+        convertNode(child, [...listStack, { ordered: false, level: listStack.length }], out, cites);
       }
       break;
     case 'listItem':
     case 'taskItem':
-      for (const child of node.content ?? []) convertNode(child, listStack, out);
+      for (const child of node.content ?? []) convertNode(child, listStack, out, cites);
       break;
     case 'blockquote':
-      out.push({ type: 'blockquote', runs: joinRuns(collectRuns(node)) });
+      out.push({ type: 'blockquote', runs: joinRuns(collectRuns(node, new Set(), cites)) });
       break;
     case 'horizontalRule':
       out.push({ type: 'horizontalRule' });
@@ -111,7 +133,14 @@ function convertNode(
       break;
     case 'caption': {
       const label = typeof node.attrs?.label === 'string' ? node.attrs.label : 'Figure';
-      out.push({ type: 'caption', label, runs: joinRuns(collectRuns(node)) });
+      out.push({ type: 'caption', label, runs: joinRuns(collectRuns(node, new Set(), cites)) });
+      break;
+    }
+    case 'bibliography': {
+      const entries = Array.isArray(node.attrs?.entries)
+        ? (node.attrs?.entries as { citeKey: string; title: string }[])
+        : [];
+      out.push({ type: 'bibliography', entries });
       break;
     }
     case 'table':
@@ -126,16 +155,17 @@ function convertNode(
       }
       break;
     case 'doc':
-      for (const child of node.content ?? []) convertNode(child, listStack, out);
+      for (const child of node.content ?? []) convertNode(child, listStack, out, cites);
       break;
     default:
-      for (const child of node.content ?? []) convertNode(child, listStack, out);
+      for (const child of node.content ?? []) convertNode(child, listStack, out, cites);
   }
 }
 
 /** Convert a ProseMirror JSON document into export blocks. */
 export function pmJsonToBlocks(doc: PmNodeLike): ExportBlock[] {
   const out: ExportBlock[] = [];
-  convertNode(doc, [], out);
+  const cites: CiteCounter = { n: 0 };
+  convertNode(doc, [], out, cites);
   return out;
 }

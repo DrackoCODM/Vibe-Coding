@@ -9,6 +9,7 @@ import { TextStyleKit } from '@tiptap/extension-text-style/text-style-kit';
 import StarterKit from '@tiptap/starter-kit';
 import { Bookmark, CrossRef } from './bookmarks';
 import { Caption } from './captions';
+import { Bibliography, Citation } from './citations';
 import { CommentMark } from './comments';
 import { GratisDoc } from './doc';
 import { TableOfContents } from './toc';
@@ -41,6 +42,8 @@ export function getEditorExtensions(): Extensions {
     Bookmark,
     CrossRef,
     Caption,
+    Citation,
+    Bibliography,
     TableOfContents,
     TaskList,
     TaskItem.configure({ nested: true }),

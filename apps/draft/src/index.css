@@ -213,7 +213,7 @@
 }
 
 .ProseMirror {
-  counter-reset: gdfn 0 gdfig 0 gdtbl 0;
+  counter-reset: gdfn 0 gdfig 0 gdtbl 0 gdcite 0;
 }
 
 .gd-caption {
@@ -251,6 +251,47 @@
   border-bottom: 1px dotted rgb(var(--accent));
   text-decoration: none;
   cursor: pointer;
+}
+
+.gd-citation::before {
+  counter-increment: gdcite;
+  content: '[' counter(gdcite) ']';
+  color: rgb(var(--accent));
+  font-size: 10px;
+  vertical-align: super;
+}
+
+.gd-bibliography {
+  border: 1px solid rgb(var(--line));
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 0 8px;
+}
+
+.gd-bibliography-title {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(var(--faint));
+  margin-bottom: 6px;
+}
+
+.gd-bibliography-entry {
+  line-height: 1.8;
+  color: rgb(var(--ink));
+  font-size: 12px;
+  counter-increment: gdref;
+}
+
+.gd-bibliography-entry::before {
+  content: '[' counter(gdref) '] ';
+  color: rgb(var(--accent));
+  font-weight: 600;
+  margin-right: 2px;
+}
+
+.gd-bibliography {
+  counter-reset: gdref 0;
 }
 
 @media print {

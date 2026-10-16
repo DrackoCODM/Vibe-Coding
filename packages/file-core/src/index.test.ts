@@ -335,6 +335,43 @@ describe('captions and cross-references', () => {
     expect(xml).toContain('Table 1: ');
     expect(xml).toContain('Figure 2: ');
   });
+
+  it('numbers inline citations in document order and exports the bibliography', () => {
+    const doc: PmNodeLike = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'citation', attrs: { citeKey: 'a', title: 'Alpha' } },
+            { type: 'citation', attrs: { citeKey: 'b', title: 'Beta' } },
+          ],
+        },
+        {
+          type: 'bibliography',
+          attrs: {
+            entries: [
+              { citeKey: 'a', title: 'Alpha' },
+              { citeKey: 'b', title: 'Beta' },
+            ],
+          },
+        },
+      ],
+    };
+    const blocks = pmJsonToBlocks(doc);
+    const paragraph = blocks[0];
+    expect(paragraph.type).toBe('paragraph');
+    const text = 'runs' in paragraph ? paragraph.runs.map((r) => r.text).join('') : '';
+    expect(text).toMatch(/\[1\]/);
+    expect(text).toMatch(/\[2\]/);
+    expect(blocks[1]).toEqual({
+      type: 'bibliography',
+      entries: [
+        { citeKey: 'a', title: 'Alpha' },
+        { citeKey: 'b', title: 'Beta' },
+      ],
+    });
+  });
 });
 
 describe('file detection', () => {
