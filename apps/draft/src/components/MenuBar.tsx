@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 export interface MenuItem {
   label: string;
   shortcut?: string;
   disabled?: boolean;
+  icon?: ReactNode;
   onSelect: () => void;
 }
 
@@ -32,15 +34,15 @@ export function MenuBar({ menus }: MenuBarProps) {
   }, [openMenu]);
 
   return (
-    <nav ref={navRef} aria-label="Main menu" className="relative flex gap-1">
+    <nav ref={navRef} aria-label="Main menu" className="relative flex gap-0.5">
       {menus.map((menu) => (
         <div key={menu.label} className="relative">
           <button
             type="button"
             aria-haspopup="menu"
             aria-expanded={openMenu === menu.label}
-            className={`gratis-focus-ring rounded px-2 py-0.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 ${
-              openMenu === menu.label ? 'bg-gray-100 dark:bg-gray-800' : ''
+            className={`gratis-focus-ring rounded-md px-2.5 py-1 text-xs font-medium text-muted transition-colors duration-fast hover:bg-ink/5 hover:text-ink ${
+              openMenu === menu.label ? 'bg-ink/8 text-ink' : ''
             }`}
             onClick={() => setOpenMenu(openMenu === menu.label ? null : menu.label)}
             onKeyDown={(e) => {
@@ -53,7 +55,7 @@ export function MenuBar({ menus }: MenuBarProps) {
             <ul
               role="menu"
               aria-label={menu.label}
-              className="absolute left-0 z-20 mt-1 min-w-52 rounded border border-gray-300 bg-white py-1 shadow-lg dark:border-gray-600 dark:bg-gray-900"
+              className="animate-menu-in absolute left-0 z-20 mt-1.5 min-w-56 origin-top rounded-lg border border-line bg-overlay p-1 shadow-elev3"
             >
               {menu.items.map((item) => (
                 <li key={item.label} role="none">
@@ -61,17 +63,20 @@ export function MenuBar({ menus }: MenuBarProps) {
                     type="button"
                     role="menuitem"
                     disabled={item.disabled}
-                    className="gratis-focus-ring flex w-full items-center justify-between gap-8 px-3 py-1 text-left text-sm hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-gray-800"
+                    className="gratis-focus-ring flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs text-ink transition-colors duration-fast hover:bg-ink/5 disabled:opacity-40"
                     onClick={() => {
                       setOpenMenu(null);
                       item.onSelect();
                     }}
                   >
-                    <span>{item.label}</span>
-                    {item.shortcut && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {item.shortcut}
+                    {item.icon && (
+                      <span className="flex w-4 shrink-0 justify-center text-muted" aria-hidden="true">
+                        {item.icon}
                       </span>
+                    )}
+                    <span className="flex-1">{item.label}</span>
+                    {item.shortcut && (
+                      <span className="text-2xs text-faint">{item.shortcut}</span>
                     )}
                   </button>
                 </li>
