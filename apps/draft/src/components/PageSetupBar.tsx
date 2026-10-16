@@ -16,7 +16,7 @@ export interface PageSetupBarProps {
 
 export function PageSetupBar({ setup, onChange }: PageSetupBarProps) {
   const selectClass =
-    'rounded border border-gray-300 bg-white px-1 py-0.5 text-sm dark:border-gray-600 dark:bg-gray-900';
+    'gratis-focus-ring rounded border border-gray-300 bg-white px-1 py-0.5 text-sm dark:border-gray-600 dark:bg-gray-900';
   return (
     <div
       role="toolbar"

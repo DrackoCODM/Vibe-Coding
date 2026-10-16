@@ -1,6 +1,6 @@
 import type { Editor } from '@tiptap/react';
 import { ToolbarButton, ToolbarSeparator } from '@gratis/ui';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { readFileAsDataUrl } from '../editor/images';
 
 const FONT_FAMILIES = [
@@ -36,8 +36,21 @@ export function Toolbar({ editor }: ToolbarProps) {
   const disabled = !editor;
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cellColorInputRef = useRef<HTMLInputElement>(null);
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!editor) return;
+    const update = () => setTick((t) => t + 1);
+    editor.on('update', update);
+    editor.on('selectionUpdate', update);
+    return () => {
+      editor.off('update', update);
+      editor.off('selectionUpdate', update);
+    };
+  }, [editor]);
+
   const selectClass =
-    'rounded border border-gray-300 bg-white px-1 py-0.5 text-sm disabled:opacity-50 dark:border-gray-600 dark:bg-gray-900';
+    'gratis-focus-ring rounded border border-gray-300 bg-white px-1 py-0.5 text-sm disabled:opacity-50 dark:border-gray-600 dark:bg-gray-900';
 
   const currentBlock = () => {
     if (!editor) return 'paragraph';

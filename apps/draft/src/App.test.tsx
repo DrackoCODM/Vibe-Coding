@@ -36,10 +36,19 @@ describe('App shell', () => {
 
   it('provides a rich text editing surface', async () => {
     const { container } = render(<App />);
-    const editable = await screen.findByRole('textbox', { name: '' });
+    const editable = await screen.findByRole('textbox', { name: 'Document content' });
     expect(editable).toBeTruthy();
     expect(editable.getAttribute('contenteditable')).toBe('true');
+    expect(editable.getAttribute('aria-multiline')).toBe('true');
     expect(container.querySelector('.ProseMirror')).toBeTruthy();
+  });
+
+  it('shows the horizontal ruler reflecting page setup', () => {
+    render(<App />);
+    const ruler = screen.getByTestId('ruler');
+    expect(ruler.getAttribute('aria-label')).toBe('Horizontal ruler, A4, 100 percent zoom');
+    fireEvent.change(screen.getByLabelText('Page size'), { target: { value: 'letter' } });
+    expect(screen.getByTestId('ruler').getAttribute('aria-label')).toContain('LETTER');
   });
 
   it('exposes formatting toolbar controls', () => {

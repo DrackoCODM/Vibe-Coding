@@ -1,22 +1,17 @@
-import { generateJSON } from '@tiptap/html';
 import type { Editor } from '@tiptap/react';
 import {
   blocksToDocx,
-  detectImportFormat,
-  docxToHtml,
   htmlToMarkdown,
   htmlToPlainText,
-  markdownToHtml,
-  parseGdraft,
-  plainTextToHtml,
   pmJsonToBlocks,
   serializeGdraft,
+  parseGdraft,
   withUpdatedAt,
   type GdraftDocument,
 } from '@gratis/file-core';
 import { GDRAFT_FILE_EXTENSION } from '@gratis/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getEditorExtensions } from '../editor/extensions';
+import { buildImportContent } from './importContent';
 import { downloadBlob, pickFileToOpen, pickSaveDestination } from './io';
 
 const OPEN_ACCEPT = '.gdraft,.docx,.md,.markdown,.html,.htm,.txt,.text';
@@ -41,18 +36,6 @@ export function writeAutoSave(doc: GdraftDocument): void {
   } catch {
     // storage full or unavailable — ignore
   }
-}
-
-async function fileToText(file: File): Promise<string> {
-  return file.text();
-}
-
-function readFileBuffer(file: File): Promise<ArrayBuffer> {
-  return file.arrayBuffer();
-}
-
-function contentFromHtml(html: string): Record<string, unknown> {
-  return generateJSON(html, getEditorExtensions()) as Record<string, unknown>;
 }
 
 export interface FileHandlers {
@@ -143,38 +126,11 @@ export function useFileHandlers(editor: Editor | null): FileHandlers {
     if (!editor) return;
     const picked = await pickFileToOpen(OPEN_ACCEPT);
     if (!picked) return;
-    const format = detectImportFormat(picked.name);
-    if (!format) {
-      window.alert(`Unsupported file type: ${picked.name}`);
-      return;
-    }
     try {
-      if (format === 'gdraft') {
-        const doc = parseGdraft(await fileToText(picked.file));
-        editor.commands.setContent(doc.content as Record<string, unknown>);
-        metaRef.current = { createdAt: doc.meta.createdAt };
-        setFileName(picked.name);
-      } else if (format === 'docx') {
-        const html = await docxToHtml(await readFileBuffer(picked.file));
-        editor.commands.setContent(contentFromHtml(html));
-        metaRef.current = null;
-        setFileName(picked.name.replace(/\.docx$/i, GDRAFT_FILE_EXTENSION));
-      } else if (format === 'md') {
-        const html = markdownToHtml(await fileToText(picked.file));
-        editor.commands.setContent(contentFromHtml(html));
-        metaRef.current = null;
-        setFileName(picked.name.replace(/\.md$/i, GDRAFT_FILE_EXTENSION));
-      } else if (format === 'html') {
-        const html = await fileToText(picked.file);
-        editor.commands.setContent(contentFromHtml(html));
-        metaRef.current = null;
-        setFileName(picked.name.replace(/\.html?$/i, GDRAFT_FILE_EXTENSION));
-      } else {
-        const html = plainTextToHtml(await fileToText(picked.file));
-        editor.commands.setContent(contentFromHtml(html));
-        metaRef.current = null;
-        setFileName(picked.name.replace(/\.txt$/i, GDRAFT_FILE_EXTENSION));
-      }
+      const result = await buildImportContent(picked.file);
+      editor.commands.setContent(result.content);
+      metaRef.current = result.createdAt ? { createdAt: result.createdAt } : null;
+      setFileName(result.suggestedName);
       setDirty(false);
     } catch (error) {
       window.alert(

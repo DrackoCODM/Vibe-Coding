@@ -5,12 +5,16 @@
 @layer components {
   .gratis-toolbar-button {
     @apply rounded px-2 py-0.5 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-gray-800;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400;
   }
   .gratis-toolbar-button.is-active {
     @apply bg-blue-100 dark:bg-blue-900;
   }
   .gratis-toolbar-separator {
     @apply mx-1 h-5 w-px bg-gray-300 dark:bg-gray-600;
+  }
+  .gratis-focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400;
   }
 }
 
@@ -20,7 +24,8 @@
 }
 
 .ProseMirror:focus-visible {
-  outline: none;
+  outline: 2px solid rgb(59 130 246 / 0.6);
+  outline-offset: 2px;
 }
 
 .ProseMirror p {

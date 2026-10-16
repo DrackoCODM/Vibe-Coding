@@ -7,6 +7,7 @@ import { EditorPage } from './components/EditorPage';
 import { FindBar } from './components/FindBar';
 import { MenuBar } from './components/MenuBar';
 import { PageSetupBar, type PageSetup } from './components/PageSetupBar';
+import { Ruler } from './components/Ruler';
 import { StatusBar } from './components/StatusBar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Toolbar } from './components/Toolbar';
@@ -38,6 +39,11 @@ export function App() {
     extensions: getEditorExtensions(),
     content: '',
     editorProps: {
+      attributes: {
+        role: 'textbox',
+        'aria-multiline': 'true',
+        'aria-label': 'Document content',
+      },
       handlePaste(view, event) {
         if (!event.clipboardData) return false;
         const files = imageFilesFromDataTransfer(event.clipboardData);
@@ -215,6 +221,11 @@ export function App() {
         onClose={() => setFindOpen(false)}
       />
       <PageSetupBar setup={pageSetup} onChange={setPageSetup} />
+      <Ruler
+        pageSize={pageSetup.pageSize}
+        margins={MARGIN_PRESETS[pageSetup.marginPreset]}
+        zoomPercent={pageSetup.zoomPercent}
+      />
       <main className="flex-1 overflow-auto p-8">
         <EditorPage
           editor={editor}

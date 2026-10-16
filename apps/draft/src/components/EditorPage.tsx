@@ -107,7 +107,7 @@ export function EditorPage({
               key={y}
               aria-hidden="true"
               data-testid="page-break"
-              className="pointer-events-none absolute left-0 right-0 border-t-2 border-dashed border-blue-300"
+              className="page-break-marker pointer-events-none absolute left-0 right-0 border-t-2 border-dashed border-blue-300"
               style={{ top: y }}
             />
           ))}

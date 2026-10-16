@@ -111,7 +111,7 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
         type="text"
         aria-label="Find"
         placeholder="Find"
-        className="w-44 rounded border border-gray-300 px-2 py-0.5 dark:border-gray-600 dark:bg-gray-800"
+        className="gratis-focus-ring w-44 rounded border border-gray-300 px-2 py-0.5 dark:border-gray-600 dark:bg-gray-800"
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -137,7 +137,7 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
       <button
         type="button"
         aria-label="Previous match"
-        className="rounded border border-gray-300 px-2 py-0.5 disabled:opacity-50 dark:border-gray-600"
+        className="gratis-focus-ring rounded border border-gray-300 px-2 py-0.5 disabled:opacity-50 dark:border-gray-600"
         disabled={matches.length === 0}
         onClick={goPrevious}
       >
@@ -146,7 +146,7 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
       <button
         type="button"
         aria-label="Next match"
-        className="rounded border border-gray-300 px-2 py-0.5 disabled:opacity-50 dark:border-gray-600"
+        className="gratis-focus-ring rounded border border-gray-300 px-2 py-0.5 disabled:opacity-50 dark:border-gray-600"
         disabled={matches.length === 0}
         onClick={goNext}
       >
@@ -182,7 +182,7 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
             type="text"
             aria-label="Replace with"
             placeholder="Replace with"
-            className="w-44 rounded border border-gray-300 px-2 py-0.5 dark:border-gray-600 dark:bg-gray-800"
+            className="gratis-focus-ring w-44 rounded border border-gray-300 px-2 py-0.5 dark:border-gray-600 dark:bg-gray-800"
             value={replacement}
             onChange={(e) => setReplacement(e.target.value)}
             onKeyDown={(e) => {
@@ -196,7 +196,7 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
           />
           <button
             type="button"
-            className="rounded border border-gray-300 px-2 py-0.5 disabled:opacity-50 dark:border-gray-600"
+            className="gratis-focus-ring rounded border border-gray-300 px-2 py-0.5 disabled:opacity-50 dark:border-gray-600"
             disabled={matches.length === 0}
             onClick={handleReplace}
           >
@@ -204,7 +204,7 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
           </button>
           <button
             type="button"
-            className="rounded border border-gray-300 px-2 py-0.5 disabled:opacity-40 dark:border-gray-600"
+            className="gratis-focus-ring rounded border border-gray-300 px-2 py-0.5 disabled:opacity-40 dark:border-gray-600"
             disabled={query === ''}
             onClick={handleReplaceAll}
           >
@@ -215,7 +215,7 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
       <button
         type="button"
         aria-label="Close find bar"
-        className="ml-auto rounded border border-gray-300 px-2 py-0.5 dark:border-gray-600"
+        className="gratis-focus-ring ml-auto rounded border border-gray-300 px-2 py-0.5 dark:border-gray-600"
         onClick={onClose}
       >
         ✕

@@ -39,7 +39,7 @@ export function MenuBar({ menus }: MenuBarProps) {
             type="button"
             aria-haspopup="menu"
             aria-expanded={openMenu === menu.label}
-            className={`rounded px-2 py-0.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 ${
+            className={`gratis-focus-ring rounded px-2 py-0.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 ${
               openMenu === menu.label ? 'bg-gray-100 dark:bg-gray-800' : ''
             }`}
             onClick={() => setOpenMenu(openMenu === menu.label ? null : menu.label)}
@@ -61,7 +61,7 @@ export function MenuBar({ menus }: MenuBarProps) {
                     type="button"
                     role="menuitem"
                     disabled={item.disabled}
-                    className="flex w-full items-center justify-between gap-8 px-3 py-1 text-left text-sm hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-gray-800"
+                    className="gratis-focus-ring flex w-full items-center justify-between gap-8 px-3 py-1 text-left text-sm hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-gray-800"
                     onClick={() => {
                       setOpenMenu(null);
                       item.onSelect();
