@@ -7,6 +7,7 @@ import { DEFAULT_DOC_SETTINGS, readDocSettings, updateDocSettings } from './doc'
 import { CommentMark, removeComment } from './comments';
 import { removeFootnote } from './footnotes';
 import { collectHeadings } from './toc';
+import { STYLE_PRESETS } from './styles';
 import { getEditorExtensions } from './extensions';
 
 let editor: Editor | null = null;
@@ -14,6 +15,12 @@ let editor: Editor | null = null;
 function createEditor(content = '<p>Hello world</p>') {
   editor = new Editor({ extensions: getEditorExtensions(), content });
   return editor;
+}
+
+function findPreset(id: string) {
+  const preset = STYLE_PRESETS.find((p) => p.id === id);
+  if (!preset) throw new Error(`missing preset: ${id}`);
+  return preset;
 }
 
 function selectImage(ed: Editor) {
@@ -348,5 +355,37 @@ describe('document settings', () => {
     const before = ed.state.doc;
     expect(ed.commands.updateTableOfContents()).toBe(true);
     expect(before.eq(ed.state.doc)).toBe(true);
+  });
+
+  it('applies style presets to the selection', () => {
+    const title = findPreset('title');
+    const edTitle = createEditor('<p>Hello world</p>');
+    edTitle.commands.setTextSelection({ from: 1, to: 12 });
+    title.apply(edTitle);
+    expect(edTitle.isActive('heading', { level: 1 })).toBe(true);
+
+    const quote = findPreset('quote');
+    const edQuote = createEditor('<p>Hello world</p>');
+    edQuote.commands.setTextSelection({ from: 1, to: 12 });
+    quote.apply(edQuote);
+    expect(edQuote.isActive('blockquote')).toBe(true);
+    quote.apply(edQuote);
+    expect(edQuote.isActive('blockquote')).toBe(false);
+
+    const normal = findPreset('normal');
+    normal.apply(edTitle);
+    expect(edTitle.isActive('heading')).toBe(false);
+    expect(edTitle.isActive('bold')).toBe(false);
+  });
+
+  it('offers list and checklist presets', () => {
+    const bullet = findPreset('bullet-list');
+    const ed = createEditor('<p>Hello world</p>');
+    ed.commands.setTextSelection({ from: 1, to: 12 });
+    bullet.apply(ed);
+    expect(ed.isActive('bulletList')).toBe(true);
+    const task = findPreset('task-list');
+    task.apply(ed);
+    expect(ed.isActive('taskList')).toBe(true);
   });
 });

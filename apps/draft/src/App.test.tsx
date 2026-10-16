@@ -95,6 +95,17 @@ describe('App shell', () => {
     expect(screen.getByLabelText('Document content').querySelector('[data-toc]')).toBeTruthy();
   });
 
+  it('has a style preset select and opens the character dialog', async () => {
+    render(<App />);
+    expect(screen.getByLabelText('Style preset')).toBeTruthy();
+    fireEvent.click(screen.getByText('Format'));
+    fireEvent.click(screen.getByText('Character formatting…'));
+    expect(screen.getByTestId('character-dialog')).toBeTruthy();
+    expect(screen.getByLabelText('Font size dialog')).toBeTruthy();
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(screen.queryByTestId('character-dialog')).toBeNull();
+  });
+
   it('defaults to dark theme and toggles the dark class on the html element', () => {
     localStorage.removeItem('gratisdraft.theme');
     render(<App />);

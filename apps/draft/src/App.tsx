@@ -3,10 +3,12 @@ import { DRAFT_APP_NAME } from '@gratis/shared';
 import { useEditor } from '@tiptap/react';
 import type { EditorView } from '@tiptap/pm/view';
 import {
+  Bold,
   FileDown,
   FilePlus,
   FileText,
   FolderOpen,
+  Italic,
   ListEnd,
   ListTree,
   MessageSquare,
@@ -20,12 +22,15 @@ import {
   Search,
   Subscript as SubscriptIcon,
   Sun,
+  Type,
+  Underline,
   Undo2,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { EditorPage } from './components/EditorPage';
 import { FindBar } from './components/FindBar';
 import { CommentsDialog } from './components/CommentsDialog';
+import { CharacterDialog } from './components/CharacterDialog';
 import { FootnotesDialog } from './components/FootnotesDialog';
 import { HeaderFooterDialog } from './components/HeaderFooterDialog';
 import { MenuBar } from './components/MenuBar';
@@ -104,6 +109,7 @@ export function App() {
   const [headerFooterOpen, setHeaderFooterOpen] = useState(false);
   const [footnotesOpen, setFootnotesOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [characterOpen, setCharacterOpen] = useState(false);
   const [stats, setStats] = useState<WordStats>({
     words: 0,
     characters: 0,
@@ -330,6 +336,34 @@ export function App() {
       ],
     },
     {
+      label: 'Format',
+      items: [
+        {
+          label: 'Character formatting…',
+          icon: <Type {...menuIconProps} />,
+          onSelect: () => setCharacterOpen(true),
+        },
+        {
+          label: 'Bold',
+          shortcut: 'Ctrl+B',
+          icon: <Bold {...menuIconProps} />,
+          onSelect: () => editor?.chain().focus().toggleBold().run(),
+        },
+        {
+          label: 'Italic',
+          shortcut: 'Ctrl+I',
+          icon: <Italic {...menuIconProps} />,
+          onSelect: () => editor?.chain().focus().toggleItalic().run(),
+        },
+        {
+          label: 'Underline',
+          shortcut: 'Ctrl+U',
+          icon: <Underline {...menuIconProps} />,
+          onSelect: () => editor?.chain().focus().toggleUnderline().run(),
+        },
+      ],
+    },
+    {
       label: 'View',
       items: [
         {
@@ -421,6 +455,11 @@ export function App() {
           if (editor) updateDocSettings(editor, { comments: items });
         }}
         onClose={() => setCommentsOpen(false)}
+      />
+      <CharacterDialog
+        editor={editor}
+        open={characterOpen}
+        onClose={() => setCharacterOpen(false)}
       />
     </div>
   );

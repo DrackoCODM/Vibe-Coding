@@ -36,8 +36,9 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { readFileAsDataUrl } from '../editor/images';
+import { STYLE_PRESETS } from '../editor/styles';
 
-const FONT_FAMILIES = [
+export const FONT_FAMILIES = [
   'Arial',
   'Calibri',
   'Cambria',
@@ -115,6 +116,27 @@ export function Toolbar({ editor }: ToolbarProps) {
       >
         <Redo2 {...iconProps} />
       </ToolbarButton>
+      <ToolbarSeparator />
+
+      <select
+        aria-label="Style preset"
+        className="gratis-select mr-1 w-28"
+        disabled={disabled}
+        value=""
+        onChange={(e) => {
+          const preset = STYLE_PRESETS.find((p) => p.id === e.target.value);
+          if (preset && editor) preset.apply(editor);
+        }}
+      >
+        <option value="" disabled>
+          Styles
+        </option>
+        {STYLE_PRESETS.map((preset) => (
+          <option key={preset.id} value={preset.id}>
+            {preset.label}
+          </option>
+        ))}
+      </select>
       <ToolbarSeparator />
 
       <select
