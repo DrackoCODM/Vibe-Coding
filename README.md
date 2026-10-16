@@ -1,17 +1,27 @@
-# Vibe Codin
+# Project Gratis
 
-Welcome to **Vibe Coding** — a project by DrackoCODM.
+**Status:** Repository foundation only — no application code has been implemented yet.
 
-## About
+## Purpose
 
-This repository is where the vibes live. Stay tuned for updates!
+Project Gratis is a planned suite of desktop applications for working with files and content, built with a future stack of TypeScript, React, and Tauri.
 
-## Getting Started
+## Planned Applications
 
-1. Clone the repo
-2. Explore the code
-3. Build something awesome
+- **Draft** (`apps/draft/`) — planned drafting/writing application.
+- **Grid** (`apps/grid/`) — planned grid-based organization application.
+- **Deck** (`apps/deck/`) — planned deck/slide-style application.
 
-## License
+## Planned Shared Packages
 
-TBD
+- **shared** (`packages/shared/`) — planned cross-app utilities and types.
+- **ui** (`packages/ui/`) — planned shared UI component library.
+- **file-core** (`packages/file-core/`) — planned file-handling core logic.
+
+## Current Setup Status
+
+- Repository folder structure has been established.
+- Foundational documentation is in place.
+- No applications, packages, or framework configurations exist yet.
+
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the planned development order and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for intended roles of each directory.
