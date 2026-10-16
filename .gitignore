@@ -12,6 +12,7 @@ target/
 # Caches
 .cache/
 .turbo/
+.vite/
 *.tsbuildinfo
 
 # Environment
