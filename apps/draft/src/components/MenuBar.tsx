@@ -6,6 +6,8 @@ export interface MenuItem {
   shortcut?: string;
   disabled?: boolean;
   icon?: ReactNode;
+  /** Renders as a divider row (label/onSelect ignored). */
+  separator?: boolean;
   onSelect: () => void;
 }
 
@@ -57,31 +59,42 @@ export function MenuBar({ menus }: MenuBarProps) {
               aria-label={menu.label}
               className="animate-menu-in absolute left-0 z-20 mt-1.5 min-w-56 origin-top rounded-lg border border-line bg-overlay p-1 shadow-elev3"
             >
-              {menu.items.map((item) => (
-                <li key={item.label} role="none">
-                  <button
-                    type="button"
-                    role="menuitem"
-                    disabled={item.disabled}
-                    className="gratis-focus-ring flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs text-ink transition-colors duration-fast hover:bg-ink/5 disabled:opacity-40"
-                    onClick={() => {
-                      setOpenMenu(null);
-                      item.onSelect();
-                    }}
-                  >
-                    {item.icon && (
-                      <span
-                        className="flex w-4 shrink-0 justify-center text-muted"
-                        aria-hidden="true"
-                      >
-                        {item.icon}
-                      </span>
-                    )}
-                    <span className="flex-1">{item.label}</span>
-                    {item.shortcut && <span className="text-2xs text-faint">{item.shortcut}</span>}
-                  </button>
-                </li>
-              ))}
+              {menu.items.map((item) =>
+                item.separator ? (
+                  <li
+                    key={item.label}
+                    role="separator"
+                    className="mx-2 my-1 border-t border-line"
+                    aria-label="Menu separator"
+                  />
+                ) : (
+                  <li key={item.label} role="none">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      disabled={item.disabled}
+                      className="gratis-focus-ring flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs text-ink transition-colors duration-fast hover:bg-ink/5 disabled:opacity-40"
+                      onClick={() => {
+                        setOpenMenu(null);
+                        item.onSelect();
+                      }}
+                    >
+                      {item.icon && (
+                        <span
+                          className="flex w-4 shrink-0 justify-center text-muted"
+                          aria-hidden="true"
+                        >
+                          {item.icon}
+                        </span>
+                      )}
+                      <span className="flex-1">{item.label}</span>
+                      {item.shortcut && (
+                        <span className="text-2xs text-faint">{item.shortcut}</span>
+                      )}
+                    </button>
+                  </li>
+                ),
+              )}
             </ul>
           )}
         </div>

@@ -10,11 +10,13 @@ import {
   FileText,
   FolderOpen,
   Image as ImageIcon,
+  Info,
   Italic,
   Link2,
   ListEnd,
   ListTree,
   MessageSquare,
+  Minus,
   Moon,
   PanelTop,
   Printer,
@@ -23,6 +25,7 @@ import {
   Save,
   SaveAll,
   Search,
+  SeparatorHorizontal as SepIcon,
   Subscript as SubscriptIcon,
   Sun,
   Table as TableIcon,
@@ -30,7 +33,8 @@ import {
   Underline,
   Undo2,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AboutDialog } from './components/AboutDialog';
 import { EditorPage } from './components/EditorPage';
 import { FindBar } from './components/FindBar';
 import { CommentsDialog } from './components/CommentsDialog';
@@ -72,6 +76,7 @@ async function insertImageFiles(files: File[], insert: (src: string, alt: string
 
 export function App() {
   const [darkMode, setDarkMode] = useState(readInitialDark);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [pageSetup, setPageSetup] = useState<PageSetup>({
     pageSize: 'a4',
     marginPreset: 'normal',
@@ -117,6 +122,7 @@ export function App() {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [characterOpen, setCharacterOpen] = useState(false);
   const [crossRefOpen, setCrossRefOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [stats, setStats] = useState<WordStats>({
     words: 0,
     characters: 0,
@@ -288,25 +294,63 @@ export function App() {
       label: 'Edit',
       items: [
         {
-          label: 'Header and footer…',
-          icon: <PanelTop {...menuIconProps} />,
-          onSelect: () => setHeaderFooterOpen(true),
+          label: 'Find',
+          shortcut: 'Ctrl+F',
+          icon: <Search {...menuIconProps} />,
+          onSelect: () => {
+            setFindReplaceOpen(false);
+            setFindOpen(true);
+          },
         },
         {
-          label: 'Add footnote',
-          icon: <SubscriptIcon {...menuIconProps} />,
-          onSelect: () => editor?.commands.addFootnote(),
+          label: 'Replace',
+          shortcut: 'Ctrl+H',
+          icon: <Replace {...menuIconProps} />,
+          onSelect: () => {
+            setFindReplaceOpen(true);
+            setFindOpen(true);
+          },
+        },
+        { label: 'sep-find', separator: true, onSelect: () => undefined },
+        {
+          label: 'Undo',
+          shortcut: 'Ctrl+Z',
+          icon: <Undo2 {...menuIconProps} />,
+          onSelect: () => editor?.chain().focus().undo().run(),
         },
         {
-          label: 'Footnotes…',
-          icon: <ListEnd {...menuIconProps} />,
-          onSelect: () => setFootnotesOpen(true),
+          label: 'Redo',
+          shortcut: 'Ctrl+Y',
+          icon: <Redo2 {...menuIconProps} />,
+          onSelect: () => editor?.chain().focus().redo().run(),
+        },
+      ],
+    },
+    {
+      label: 'Insert',
+      items: [
+        {
+          label: 'Page break',
+          icon: <SepIcon {...menuIconProps} />,
+          onSelect: () => editor?.commands.setPageBreak(),
         },
         {
-          label: 'Comments…',
-          icon: <MessageSquare {...menuIconProps} />,
-          onSelect: () => setCommentsOpen(true),
+          label: 'Horizontal rule',
+          icon: <Minus {...menuIconProps} />,
+          onSelect: () => editor?.chain().focus().setHorizontalRule().run(),
         },
+        {
+          label: 'Image',
+          icon: <ImageIcon {...menuIconProps} />,
+          onSelect: () => imageInputRef.current?.click(),
+        },
+        {
+          label: 'Table',
+          icon: <TableIcon {...menuIconProps} />,
+          onSelect: () =>
+            editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: false }).run(),
+        },
+        { label: 'sep-last', separator: true, onSelect: () => undefined },
         {
           label: 'Table of contents',
           icon: <ListTree {...menuIconProps} />,
@@ -332,35 +376,27 @@ export function App() {
           icon: <Link2 {...menuIconProps} />,
           onSelect: () => setCrossRefOpen(true),
         },
+        { label: 'sep-head', separator: true, onSelect: () => undefined },
         {
-          label: 'Find',
-          shortcut: 'Ctrl+F',
-          icon: <Search {...menuIconProps} />,
-          onSelect: () => {
-            setFindReplaceOpen(false);
-            setFindOpen(true);
-          },
+          label: 'Header and footer…',
+          icon: <PanelTop {...menuIconProps} />,
+          onSelect: () => setHeaderFooterOpen(true),
         },
         {
-          label: 'Replace',
-          shortcut: 'Ctrl+H',
-          icon: <Replace {...menuIconProps} />,
-          onSelect: () => {
-            setFindReplaceOpen(true);
-            setFindOpen(true);
-          },
+          label: 'Add footnote',
+          icon: <SubscriptIcon {...menuIconProps} />,
+          onSelect: () => editor?.commands.addFootnote(),
         },
         {
-          label: 'Undo',
-          shortcut: 'Ctrl+Z',
-          icon: <Undo2 {...menuIconProps} />,
-          onSelect: () => editor?.chain().focus().undo().run(),
+          label: 'Footnotes…',
+          icon: <ListEnd {...menuIconProps} />,
+          onSelect: () => setFootnotesOpen(true),
         },
+        { label: 'sep-comments', separator: true, onSelect: () => undefined },
         {
-          label: 'Redo',
-          shortcut: 'Ctrl+Y',
-          icon: <Redo2 {...menuIconProps} />,
-          onSelect: () => editor?.chain().focus().redo().run(),
+          label: 'Comments…',
+          icon: <MessageSquare {...menuIconProps} />,
+          onSelect: () => setCommentsOpen(true),
         },
       ],
     },
@@ -372,6 +408,7 @@ export function App() {
           icon: <Type {...menuIconProps} />,
           onSelect: () => setCharacterOpen(true),
         },
+        { label: 'sep-fmt', separator: true, onSelect: () => undefined },
         {
           label: 'Bold',
           shortcut: 'Ctrl+B',
@@ -402,10 +439,36 @@ export function App() {
         },
       ],
     },
+    {
+      label: 'Help',
+      items: [
+        {
+          label: 'About Project Gratis',
+          icon: <Info {...menuIconProps} />,
+          onSelect: () => setAboutOpen(true),
+        },
+      ],
+    },
   ];
 
   return (
     <div className="flex h-screen flex-col bg-surface text-ink">
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        data-testid="image-input"
+        onChange={(event) => {
+          const files = event.target.files ? Array.from(event.target.files) : [];
+          event.currentTarget.value = '';
+          if (!editor || files.length === 0) return;
+          void insertImageFiles(files, (src, alt) =>
+            editor.chain().focus().setImage({ src, alt }).run(),
+          );
+        }}
+      />
       <header className="flex h-9 shrink-0 items-center gap-2 border-b border-line bg-raised px-3">
         <span className="text-xs font-semibold tracking-tight">{DRAFT_APP_NAME}</span>
         <span className="max-w-64 truncate text-xs text-muted">
@@ -491,6 +554,7 @@ export function App() {
         onClose={() => setCharacterOpen(false)}
       />
       <CrossRefDialog editor={editor} open={crossRefOpen} onClose={() => setCrossRefOpen(false)} />
+      <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </div>
   );
 }

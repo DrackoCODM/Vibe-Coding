@@ -45,7 +45,7 @@ describe('App shell', () => {
 
   it('edits headers and footers in a dialog and shows them on the page', async () => {
     render(<App />);
-    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Insert'));
     fireEvent.click(screen.getByText('Header and footer…'));
     expect(screen.getByRole('dialog', { name: 'Header and footer' })).toBeTruthy();
     fireEvent.change(screen.getByLabelText('Header text'), { target: { value: 'My Header' } });
@@ -61,10 +61,10 @@ describe('App shell', () => {
   it('adds a footnote and edits its note in the footnotes dialog', async () => {
     const { container } = render(<App />);
     await screen.findByRole('textbox', { name: 'Document content' });
-    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Insert'));
     fireEvent.click(screen.getByText('Add footnote'));
     expect(container.querySelector('sup[data-footnote-id]')).toBeTruthy();
-    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Insert'));
     fireEvent.click(screen.getByText('Footnotes…'));
     expect(screen.getByRole('dialog', { name: 'Footnotes' })).toBeTruthy();
     fireEvent.change(screen.getByLabelText('Footnote 1 text'), { target: { value: 'My note' } });
@@ -78,7 +78,7 @@ describe('App shell', () => {
   it('opens the comments dialog with an empty state', async () => {
     render(<App />);
     expect(screen.getByLabelText('Add comment')).toBeTruthy();
-    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Insert'));
     fireEvent.click(screen.getByText('Comments…'));
     expect(screen.getByRole('dialog', { name: 'Comments' })).toBeTruthy();
     expect(screen.getByRole('dialog', { name: 'Comments' }).textContent).toContain(
@@ -88,9 +88,9 @@ describe('App shell', () => {
     expect(screen.queryByTestId('comments-dialog')).toBeNull();
   });
 
-  it('inserts a table of contents from the Edit menu', async () => {
+  it('inserts a table of contents from the Insert menu', async () => {
     render(<App />);
-    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Insert'));
     fireEvent.click(screen.getByText('Table of contents'));
     expect(screen.getByLabelText('Document content').querySelector('[data-toc]')).toBeTruthy();
   });
@@ -106,9 +106,18 @@ describe('App shell', () => {
     expect(screen.queryByTestId('character-dialog')).toBeNull();
   });
 
+  it('opens the about dialog from the Help menu', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Help'));
+    fireEvent.click(screen.getByText('About Project Gratis'));
+    expect(screen.getByTestId('about-dialog')).toBeTruthy();
+    fireEvent.click(screen.getByText('Close'));
+    expect(screen.queryByTestId('about-dialog')).toBeNull();
+  });
+
   it('shows an empty cross-reference dialog', async () => {
     render(<App />);
-    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Insert'));
     fireEvent.click(screen.getByText('Cross-reference…'));
     expect(screen.getByTestId('crossref-dialog')).toBeTruthy();
     expect(screen.getByTestId('crossref-dialog').textContent).toContain(
@@ -118,11 +127,18 @@ describe('App shell', () => {
     expect(screen.queryByTestId('crossref-dialog')).toBeNull();
   });
 
-  it('inserts a caption from the Edit menu', async () => {
+  it('inserts a caption from the Insert menu', async () => {
     render(<App />);
-    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Insert'));
     fireEvent.click(screen.getByText('Figure caption'));
     expect(screen.getByLabelText('Document content').querySelector('[data-caption]')).toBeTruthy();
+  });
+
+  it('renders all six top-level menus', () => {
+    render(<App />);
+    for (const menu of ['File', 'Edit', 'Insert', 'Format', 'View', 'Help']) {
+      expect(screen.getByText(menu)).toBeTruthy();
+    }
   });
 
   it('defaults to dark theme and toggles the dark class on the html element', () => {
