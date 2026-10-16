@@ -1,10 +1,12 @@
 import { Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { CellSelection } from '@tiptap/pm/tables';
+import type { Node as ProsemirrorNode } from '@tiptap/pm/model';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DEFAULT_DOC_SETTINGS, readDocSettings, updateDocSettings } from './doc';
 import { CommentMark, removeComment } from './comments';
 import { removeFootnote } from './footnotes';
+import { collectHeadings } from './toc';
 import { getEditorExtensions } from './extensions';
 
 let editor: Editor | null = null;
@@ -298,5 +300,53 @@ describe('document settings', () => {
     const after = readDocSettings(ed.state.doc);
     expect(after.comments).toHaveLength(0);
     expect(ed.getHTML()).not.toContain('data-comment-id');
+  });
+
+  it('inserts a table of contents with collected headings', () => {
+    const ed = createEditor('<h1>Alpha</h1><p>mid</p><h2>Beta</h2>');
+    expect(ed.commands.insertTableOfContents()).toBe(true);
+    expect(collectHeadings(ed.state.doc)).toEqual([
+      { text: 'Alpha', level: 1 },
+      { text: 'Beta', level: 2 },
+    ]);
+    const tocNodes: ProsemirrorNode[] = [];
+    ed.state.doc.descendants((node) => {
+      if (node.type.name === 'toc') tocNodes.push(node);
+    });
+    expect(tocNodes).toHaveLength(1);
+    expect(tocNodes[0].attrs.entries).toEqual([
+      { text: 'Alpha', level: 1 },
+      { text: 'Beta', level: 2 },
+    ]);
+    expect(ed.getHTML()).toContain('data-toc');
+  });
+
+  it('refreshes stale table of contents entries', () => {
+    const ed = createEditor('<h1>Alpha</h1>');
+    expect(ed.commands.insertTableOfContents()).toBe(true);
+    ed.chain()
+      .insertContentAt(ed.state.doc.content.size - 1, {
+        type: 'heading',
+        attrs: { level: 2 },
+        content: [{ type: 'text', text: 'Added later' }],
+      })
+      .run();
+    expect(ed.commands.updateTableOfContents()).toBe(true);
+    const tocNodes: ProsemirrorNode[] = [];
+    ed.state.doc.descendants((node) => {
+      if (node.type.name === 'toc') tocNodes.push(node);
+    });
+    expect(tocNodes[0].attrs.entries).toEqual([
+      { text: 'Alpha', level: 1 },
+      { text: 'Added later', level: 2 },
+    ]);
+  });
+
+  it('updateTableOfContents is a no-op when entries match', () => {
+    const ed = createEditor('<h1>Alpha</h1>');
+    expect(ed.commands.insertTableOfContents()).toBe(true);
+    const before = ed.state.doc;
+    expect(ed.commands.updateTableOfContents()).toBe(true);
+    expect(before.eq(ed.state.doc)).toBe(true);
   });
 });

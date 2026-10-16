@@ -9,6 +9,7 @@ import { TextStyleKit } from '@tiptap/extension-text-style/text-style-kit';
 import StarterKit from '@tiptap/starter-kit';
 import { CommentMark } from './comments';
 import { GratisDoc } from './doc';
+import { TableOfContents } from './toc';
 import { FootnoteRef } from './footnotes';
 import { ImageWithAlign } from './images';
 import { PageBreak } from './pageBreak';
@@ -35,6 +36,7 @@ export function getEditorExtensions(): Extensions {
     Subscript,
     Superscript,
     CommentMark,
+    TableOfContents,
     TaskList,
     TaskItem.configure({ nested: true }),
     TableWithShading.configure({ resizable: true }),

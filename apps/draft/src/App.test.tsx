@@ -88,6 +88,13 @@ describe('App shell', () => {
     expect(screen.queryByTestId('comments-dialog')).toBeNull();
   });
 
+  it('inserts a table of contents from the Edit menu', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Table of contents'));
+    expect(screen.getByLabelText('Document content').querySelector('[data-toc]')).toBeTruthy();
+  });
+
   it('defaults to dark theme and toggles the dark class on the html element', () => {
     localStorage.removeItem('gratisdraft.theme');
     render(<App />);

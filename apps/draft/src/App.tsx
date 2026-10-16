@@ -8,6 +8,7 @@ import {
   FileText,
   FolderOpen,
   ListEnd,
+  ListTree,
   MessageSquare,
   Moon,
   PanelTop,
@@ -136,6 +137,19 @@ export function App() {
     editor.on('update', syncSettings);
     return () => {
       editor.off('update', syncSettings);
+    };
+  }, [editor]);
+
+  useEffect(() => {
+    if (!editor) return;
+    // Keeps ToC blocks in sync; dispatches only when entries are stale.
+    const updateTocs = () => {
+      editor.commands.updateTableOfContents();
+    };
+    updateTocs();
+    editor.on('update', updateTocs);
+    return () => {
+      editor.off('update', updateTocs);
     };
   }, [editor]);
 
@@ -277,6 +291,11 @@ export function App() {
           label: 'Comments…',
           icon: <MessageSquare {...menuIconProps} />,
           onSelect: () => setCommentsOpen(true),
+        },
+        {
+          label: 'Table of contents',
+          icon: <ListTree {...menuIconProps} />,
+          onSelect: () => editor?.commands.insertTableOfContents(),
         },
         {
           label: 'Find',
