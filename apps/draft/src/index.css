@@ -1,3 +1,128 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .gratis-toolbar-button {
+    @apply rounded px-2 py-0.5 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-gray-800;
+  }
+  .gratis-toolbar-button.is-active {
+    @apply bg-blue-100 dark:bg-blue-900;
+  }
+  .gratis-toolbar-separator {
+    @apply mx-1 h-5 w-px bg-gray-300 dark:bg-gray-600;
+  }
+}
+
+.ProseMirror {
+  outline: none;
+  min-height: 24rem;
+}
+
+.ProseMirror:focus-visible {
+  outline: none;
+}
+
+.ProseMirror p {
+  margin: 0.25em 0;
+  line-height: 1.6;
+}
+
+.ProseMirror h1 {
+  font-size: 2em;
+  font-weight: 700;
+  margin: 0.5em 0;
+}
+.ProseMirror h2 {
+  font-size: 1.5em;
+  font-weight: 700;
+  margin: 0.5em 0;
+}
+.ProseMirror h3 {
+  font-size: 1.17em;
+  font-weight: 700;
+  margin: 0.5em 0;
+}
+.ProseMirror h4 {
+  font-size: 1em;
+  font-weight: 700;
+  margin: 0.5em 0;
+}
+.ProseMirror h5 {
+  font-size: 0.83em;
+  font-weight: 700;
+  margin: 0.5em 0;
+}
+.ProseMirror h6 {
+  font-size: 0.67em;
+  font-weight: 700;
+  margin: 0.5em 0;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5em;
+  margin: 0.25em 0;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid #cbd5e1;
+  padding-left: 1em;
+  margin: 0.5em 0;
+  color: #475569;
+}
+
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid #cbd5e1;
+  margin: 1em 0;
+}
+
+.ProseMirror a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.ProseMirror ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0.25em;
+}
+
+.ProseMirror ul[data-type='taskList'] li {
+  display: flex;
+  gap: 0.5em;
+}
+
+.ProseMirror ul[data-type='taskList'] li > label {
+  flex-shrink: 0;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5em 0;
+}
+
+.ProseMirror table td,
+.ProseMirror table th {
+  border: 1px solid #cbd5e1;
+  padding: 0.25em 0.5em;
+  vertical-align: top;
+  position: relative;
+}
+
+.ProseMirror .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(59, 130, 246, 0.18);
+  pointer-events: none;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}

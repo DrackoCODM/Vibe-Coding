@@ -1,13 +1,19 @@
 import { DRAFT_APP_NAME } from '@gratis/shared';
+import { useEditor } from '@tiptap/react';
 import { useState } from 'react';
+import { getEditorExtensions } from './editor/extensions';
+import { EditorPage } from './components/EditorPage';
 import { MenuBar } from './components/MenuBar';
-import { PageCanvas } from './components/PageCanvas';
 import { StatusBar } from './components/StatusBar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Toolbar } from './components/Toolbar';
 
 export function App() {
   const [darkMode, setDarkMode] = useState(false);
+  const editor = useEditor({
+    extensions: getEditorExtensions(),
+    content: '',
+  });
 
   const toggleTheme = () => {
     setDarkMode((prev) => {
@@ -26,9 +32,9 @@ export function App() {
           <ThemeToggle dark={darkMode} onToggle={toggleTheme} />
         </div>
       </header>
-      <Toolbar />
+      <Toolbar editor={editor} />
       <main className="flex-1 overflow-auto p-8">
-        <PageCanvas />
+        <EditorPage editor={editor} />
       </main>
       <StatusBar wordCount={0} />
     </div>

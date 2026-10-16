@@ -19,4 +19,38 @@ describe('App shell', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Switch to light theme' }));
     expect(document.documentElement.classList.contains('dark')).toBe(false);
   });
+
+  it('provides a rich text editing surface', async () => {
+    const { container } = render(<App />);
+    const editable = await screen.findByRole('textbox', { name: '' });
+    expect(editable).toBeTruthy();
+    expect(editable.getAttribute('contenteditable')).toBe('true');
+    expect(container.querySelector('.ProseMirror')).toBeTruthy();
+  });
+
+  it('exposes formatting toolbar controls', () => {
+    render(<App />);
+    for (const label of [
+      'Bold',
+      'Italic',
+      'Underline',
+      'Strikethrough',
+      'Text color',
+      'Highlight color',
+      'Font family',
+      'Font size',
+      'Line spacing',
+      'Align center',
+      'Bullet list',
+      'Numbered list',
+      'Task list',
+      'Blockquote',
+      'Link',
+      'Horizontal rule',
+      'Undo',
+      'Redo',
+    ]) {
+      expect(screen.getByLabelText(label), label).toBeTruthy();
+    }
+  });
 });
