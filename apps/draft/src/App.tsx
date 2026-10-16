@@ -11,6 +11,7 @@ import { ThemeToggle } from './components/ThemeToggle';
 import { Toolbar } from './components/Toolbar';
 import { getEditorExtensions } from './editor/extensions';
 import { imageFilesFromDataTransfer, isImageFile, readFileAsDataUrl } from './editor/images';
+import { useFileHandlers } from './files/useFileHandlers';
 import { MARGIN_PRESETS } from './page/margins';
 
 type EditorViewWithEditor = EditorView & { editor: Editor };
@@ -56,6 +57,8 @@ export function App() {
     },
   });
 
+  const files = useFileHandlers(editor);
+
   const handlePageChange = useCallback((current: number, total: number) => {
     setPageInfo((prev) =>
       prev.current === current && prev.total === total ? prev : { current, total },
@@ -70,11 +73,55 @@ export function App() {
     });
   };
 
+  const menus = [
+    {
+      label: 'File',
+      items: [
+        { label: 'New', shortcut: 'Ctrl+N', onSelect: files.newDocument },
+        { label: 'Open / Import…', shortcut: 'Ctrl+O', onSelect: () => void files.open() },
+        { label: 'Save', shortcut: 'Ctrl+S', onSelect: () => void files.save() },
+        { label: 'Save As…', shortcut: 'Ctrl+Shift+S', onSelect: () => void files.saveAs() },
+        { label: 'Export as Word (.docx)', onSelect: () => void files.exportAs('docx') },
+        { label: 'Export as Markdown (.md)', onSelect: () => void files.exportAs('md') },
+        { label: 'Export as HTML (.html)', onSelect: () => void files.exportAs('html') },
+        { label: 'Export as Plain text (.txt)', onSelect: () => void files.exportAs('txt') },
+        {
+          label: 'Export as PDF (print)',
+          shortcut: 'Ctrl+P',
+          onSelect: () => void files.exportAs('pdf'),
+        },
+      ],
+    },
+    {
+      label: 'Edit',
+      items: [
+        {
+          label: 'Undo',
+          shortcut: 'Ctrl+Z',
+          onSelect: () => editor?.chain().focus().undo().run(),
+        },
+        {
+          label: 'Redo',
+          shortcut: 'Ctrl+Y',
+          onSelect: () => editor?.chain().focus().redo().run(),
+        },
+      ],
+    },
+    {
+      label: 'View',
+      items: [{ label: darkMode ? 'Light theme' : 'Dark theme', onSelect: toggleTheme }],
+    },
+  ];
+
   return (
     <div className="flex h-screen flex-col bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-gray-100">
       <header className="flex items-center gap-2 border-b border-gray-300 bg-white px-3 py-1 dark:border-gray-700 dark:bg-gray-900">
         <span className="text-sm font-semibold">{DRAFT_APP_NAME}</span>
-        <MenuBar />
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {files.fileName}
+          {files.dirty ? ' *' : ''}
+        </span>
+        <MenuBar menus={menus} />
         <div className="ml-auto">
           <ThemeToggle dark={darkMode} onToggle={toggleTheme} />
         </div>

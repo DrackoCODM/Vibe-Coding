@@ -86,7 +86,7 @@ export function EditorPage({
         aria-label="Page canvas"
         data-page-size={pageSize}
         data-page-count={pageCount}
-        className="relative origin-top bg-white shadow-lg dark:bg-gray-100"
+        className="page relative origin-top bg-white shadow-lg dark:bg-gray-100"
         style={{
           width: pageWidthPx,
           minHeight: sheetHeightPx,

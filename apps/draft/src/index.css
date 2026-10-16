@@ -126,3 +126,34 @@
 .ProseMirror.resize-cursor {
   cursor: col-resize;
 }
+
+@media print {
+  header,
+  [aria-label='Formatting'],
+  [aria-label='Page setup'],
+  [aria-label='Status bar'] {
+    display: none !important;
+  }
+
+  html,
+  body,
+  #root {
+    height: auto !important;
+    background: #fff !important;
+  }
+
+  main {
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .page {
+    transform: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+
+  .page-break-marker {
+    display: none !important;
+  }
+}
