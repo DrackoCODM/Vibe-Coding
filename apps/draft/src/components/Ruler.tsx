@@ -1,4 +1,5 @@
 import { mmToPx, PAGE_SIZES, type PageSizeName } from '@gratis/shared';
+import type { PageOrientation } from '../editor/doc';
 import type { Margins } from '../page/margins';
 
 export interface RulerTick {
@@ -19,10 +20,15 @@ export interface RulerProps {
   pageSize: PageSizeName;
   margins: Margins;
   zoomPercent: number;
+  orientation?: PageOrientation;
 }
 
-export function Ruler({ pageSize, margins, zoomPercent }: RulerProps) {
-  const page = PAGE_SIZES[pageSize];
+export function Ruler({ pageSize, margins, zoomPercent, orientation = 'portrait' }: RulerProps) {
+  const base = PAGE_SIZES[pageSize];
+  const page =
+    orientation === 'landscape'
+      ? { widthMm: base.heightMm, heightMm: base.widthMm }
+      : { widthMm: base.widthMm, heightMm: base.heightMm };
   const zoom = zoomPercent / 100;
   const pxPerMm = mmToPx(1) * zoom;
   const widthPx = mmToPx(page.widthMm) * zoom;

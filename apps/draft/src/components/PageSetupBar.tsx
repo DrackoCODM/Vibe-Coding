@@ -1,4 +1,6 @@
+import type { Editor } from '@tiptap/react';
 import type { PageSizeName } from '@gratis/shared';
+import { updateDocSettings, type DocSettings } from '../editor/doc';
 import { MARGIN_PRESETS, type MarginPresetName } from '../page/margins';
 
 export const ZOOM_LEVELS = [50, 75, 90, 100, 125, 150, 200];
@@ -11,10 +13,13 @@ export interface PageSetup {
 
 export interface PageSetupBarProps {
   setup: PageSetup;
+  settings: DocSettings;
+  editor: Editor | null;
   onChange: (setup: PageSetup) => void;
 }
 
-export function PageSetupBar({ setup, onChange }: PageSetupBarProps) {
+export function PageSetupBar({ setup, settings, editor, onChange }: PageSetupBarProps) {
+  const disabled = !editor;
   return (
     <div
       role="toolbar"
@@ -31,6 +36,40 @@ export function PageSetupBar({ setup, onChange }: PageSetupBarProps) {
         >
           <option value="a4">A4</option>
           <option value="letter">Letter</option>
+        </select>
+      </label>
+      <label className="flex items-center gap-1.5 text-muted">
+        Orientation
+        <select
+          aria-label="Orientation"
+          className="gratis-select"
+          disabled={disabled}
+          value={settings.orientation}
+          onChange={(e) => {
+            if (editor)
+              updateDocSettings(editor, {
+                orientation: e.target.value as DocSettings['orientation'],
+              });
+          }}
+        >
+          <option value="portrait">Portrait</option>
+          <option value="landscape">Landscape</option>
+        </select>
+      </label>
+      <label className="flex items-center gap-1.5 text-muted">
+        Columns
+        <select
+          aria-label="Columns"
+          className="gratis-select"
+          disabled={disabled}
+          value={settings.columns}
+          onChange={(e) => {
+            if (editor) updateDocSettings(editor, { columns: Number(e.target.value) as 1 | 2 | 3 });
+          }}
+        >
+          <option value="1">One</option>
+          <option value="2">Two</option>
+          <option value="3">Three</option>
         </select>
       </label>
       <label className="flex items-center gap-1.5 text-muted">
@@ -61,6 +100,20 @@ export function PageSetupBar({ setup, onChange }: PageSetupBarProps) {
             </option>
           ))}
         </select>
+      </label>
+      <label className="flex items-center gap-1.5 text-muted">
+        Watermark
+        <input
+          aria-label="Watermark text"
+          type="text"
+          className="gratis-input w-32"
+          placeholder="None"
+          disabled={disabled}
+          value={settings.watermarkText}
+          onChange={(e) => {
+            if (editor) updateDocSettings(editor, { watermarkText: e.target.value });
+          }}
+        />
       </label>
       <span className="text-2xs text-faint">
         {MARGIN_PRESETS[setup.marginPreset].topMm === MARGIN_PRESETS[setup.marginPreset].leftMm

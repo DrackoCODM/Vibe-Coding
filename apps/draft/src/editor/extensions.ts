@@ -7,6 +7,7 @@ import TaskList from '@tiptap/extension-task-list';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyleKit } from '@tiptap/extension-text-style/text-style-kit';
 import StarterKit from '@tiptap/starter-kit';
+import { GratisDoc } from './doc';
 import { ImageWithAlign } from './images';
 import {
   TableCellWithShading,
@@ -18,9 +19,11 @@ import {
 export function getEditorExtensions(): Extensions {
   return [
     StarterKit.configure({
+      document: false,
       heading: { levels: [1, 2, 3, 4, 5, 6] },
       link: { openOnClick: false },
     }),
+    GratisDoc,
     TextStyleKit,
     Highlight.configure({ multicolor: true }),
     TextAlign.configure({ types: ['heading', 'paragraph'] }),

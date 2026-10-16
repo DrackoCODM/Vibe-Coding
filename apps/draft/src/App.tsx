@@ -27,6 +27,7 @@ import { StatusBar } from './components/StatusBar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Toolbar } from './components/Toolbar';
 import { getEditorExtensions } from './editor/extensions';
+import { DEFAULT_DOC_SETTINGS, readDocSettings, type DocSettings } from './editor/doc';
 import { imageFilesFromDataTransfer, isImageFile, readFileAsDataUrl } from './editor/images';
 import { countWords, getDocText, type WordStats } from './editor/stats';
 import { useFileHandlers } from './files/useFileHandlers';
@@ -53,6 +54,7 @@ export function App() {
     zoomPercent: 100,
   });
   const [pageInfo, setPageInfo] = useState({ current: 1, total: 1 });
+  const [docSettings, setDocSettings] = useState<DocSettings>(DEFAULT_DOC_SETTINGS);
   const editor = useEditor({
     extensions: getEditorExtensions(),
     content: '',
@@ -104,6 +106,21 @@ export function App() {
     return () => {
       clearTimeout(timer);
       editor.off('update', update);
+    };
+  }, [editor]);
+
+  useEffect(() => {
+    if (!editor) return;
+    const syncSettings = () => {
+      setDocSettings((prev) => {
+        const next = readDocSettings(editor.state.doc);
+        return prev === next ? next : { ...prev, ...next };
+      });
+    };
+    syncSettings();
+    editor.on('update', syncSettings);
+    return () => {
+      editor.off('update', syncSettings);
     };
   }, [editor]);
 
@@ -290,11 +307,17 @@ export function App() {
         showReplace={findReplaceOpen}
         onClose={() => setFindOpen(false)}
       />
-      <PageSetupBar setup={pageSetup} onChange={setPageSetup} />
+      <PageSetupBar
+        setup={pageSetup}
+        settings={docSettings}
+        editor={editor}
+        onChange={setPageSetup}
+      />
       <Ruler
         pageSize={pageSetup.pageSize}
         margins={MARGIN_PRESETS[pageSetup.marginPreset]}
         zoomPercent={pageSetup.zoomPercent}
+        orientation={docSettings.orientation}
       />
       <main className="flex-1 overflow-auto p-8">
         <EditorPage
@@ -302,6 +325,9 @@ export function App() {
           pageSize={pageSetup.pageSize}
           margins={MARGIN_PRESETS[pageSetup.marginPreset]}
           zoomPercent={pageSetup.zoomPercent}
+          orientation={docSettings.orientation}
+          columns={docSettings.columns}
+          watermarkText={docSettings.watermarkText}
           onPageChange={handlePageChange}
         />
       </main>

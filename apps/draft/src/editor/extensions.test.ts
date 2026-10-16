@@ -2,6 +2,7 @@ import { Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { CellSelection } from '@tiptap/pm/tables';
 import { afterEach, describe, expect, it } from 'vitest';
+import { DEFAULT_DOC_SETTINGS, readDocSettings, updateDocSettings } from './doc';
 import { getEditorExtensions } from './extensions';
 
 let editor: Editor | null = null;
@@ -197,5 +198,35 @@ describe('editor extensions', () => {
     ed.commands.updateAttributes('image', { width: '320' });
     const html = ed.getHTML();
     expect(html).toMatch(/width="320"|width: 320px/);
+  });
+});
+
+describe('document settings', () => {
+  it('exposes default settings on the document node', () => {
+    const ed = createEditor();
+    expect(readDocSettings(ed.state.doc)).toEqual(DEFAULT_DOC_SETTINGS);
+  });
+
+  it('updates orientation, columns and watermark via attributes', () => {
+    const ed = createEditor();
+    updateDocSettings(ed, { orientation: 'landscape', columns: 2 });
+    const settings = readDocSettings(ed.state.doc);
+    expect(settings.orientation).toBe('landscape');
+    expect(settings.columns).toBe(2);
+    const json = ed.getJSON();
+    expect(json.attrs?.orientation).toBe('landscape');
+    expect(json.attrs?.columns).toBe(2);
+  });
+
+  it('round-trips settings through JSON content', () => {
+    const ed = createEditor();
+    updateDocSettings(ed, { watermarkText: 'CONFIDENTIAL' });
+    const json = ed.getJSON();
+    const restored = new Editor({ extensions: getEditorExtensions(), content: json });
+    try {
+      expect(readDocSettings(restored.state.doc).watermarkText).toBe('CONFIDENTIAL');
+    } finally {
+      restored.destroy();
+    }
   });
 });

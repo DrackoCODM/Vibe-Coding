@@ -26,6 +26,16 @@ describe('App shell', () => {
     expect(screen.getByLabelText('Page canvas').getAttribute('data-page-size')).toBe('letter');
   });
 
+  it('applies orientation, columns and watermark to the canvas', () => {
+    render(<App />);
+    fireEvent.change(screen.getByLabelText('Orientation'), { target: { value: 'landscape' } });
+    expect(screen.getByLabelText('Page canvas').getAttribute('data-orientation')).toBe('landscape');
+    fireEvent.change(screen.getByLabelText('Columns'), { target: { value: '2' } });
+    expect(screen.getByLabelText('Page canvas').getAttribute('data-columns')).toBe('2');
+    fireEvent.change(screen.getByLabelText('Watermark text'), { target: { value: 'DRAFT' } });
+    expect(screen.getAllByTestId('watermark')[0].textContent).toBe('DRAFT');
+  });
+
   it('defaults to dark theme and toggles the dark class on the html element', () => {
     localStorage.removeItem('gratisdraft.theme');
     render(<App />);
