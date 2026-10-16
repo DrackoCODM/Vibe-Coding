@@ -1,6 +1,6 @@
 # Roadmap
 
-Development is planned in the following order. Nothing below has been implemented yet unless explicitly noted.
+Development is planned in the following order. Nothing below is claimed as done unless explicitly checked.
 
 ## Phase 1 — Repository Foundation
 
@@ -9,8 +9,15 @@ Development is planned in the following order. Nothing below has been implemente
 
 ## Phase 2 — Draft
 
-- [ ] Scaffold Draft application
-- [ ] Implement core Draft features
+- [x] Scaffold Draft application (Vite 7, React 18, Tailwind, TipTap v3, Vitest)
+- [x] Implement core Draft features:
+  - [x] Rich text formatting, headings, lists, links, alignment
+  - [x] Tables and images (insert, resize, align, cell shading)
+  - [x] Page view (sizes, margins, zoom, page breaks, ruler)
+  - [x] File save/open (.gdraft), import (md/html/txt/docx), export (docx/md/html/txt/pdf)
+  - [x] Find & replace, word count, keyboard shortcuts, auto-save
+  - [x] Dark/light theme, basic accessibility
+- Remaining (not done): headers/footers, footnotes, table of contents, spellcheck, higher-fidelity .docx round-trip
 
 ## Phase 3 — Grid
 
@@ -24,12 +31,12 @@ Development is planned in the following order. Nothing below has been implemente
 
 ## Phase 5 — Browser / Windows Support
 
-- [ ] Ensure applications run in the browser
+- [x] Ensure applications run in the browser (Draft runs via Vite; Grid/Deck not started)
 - [ ] Package desktop builds for Windows (Tauri)
 
 ## Phase 6 — Testing
 
-- [ ] Establish automated test suite across packages and apps
+- [x] Establish automated test suite across packages and apps (Vitest unit/integration tests; manual UI QA still needed for print output and File System Access flows)
 
 ## Phase 7 — Optional AI Features (later)
 
