@@ -228,9 +228,23 @@ describe('pmJsonToBlocks', () => {
       {
         type: 'paragraph',
         runs: [
-          { text: 'Text ', bold: false, italic: false, underline: false, strike: false, code: false },
+          {
+            text: 'Text ',
+            bold: false,
+            italic: false,
+            underline: false,
+            strike: false,
+            code: false,
+          },
           { text: '', footnoteId: 'fn-1' },
-          { text: 'more', bold: false, italic: false, underline: false, strike: false, code: false },
+          {
+            text: 'more',
+            bold: false,
+            italic: false,
+            underline: false,
+            strike: false,
+            code: false,
+          },
         ],
       },
     ]);

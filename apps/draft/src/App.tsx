@@ -8,6 +8,7 @@ import {
   FileText,
   FolderOpen,
   ListEnd,
+  MessageSquare,
   Moon,
   PanelTop,
   Printer,
@@ -23,6 +24,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { EditorPage } from './components/EditorPage';
 import { FindBar } from './components/FindBar';
+import { CommentsDialog } from './components/CommentsDialog';
 import { FootnotesDialog } from './components/FootnotesDialog';
 import { HeaderFooterDialog } from './components/HeaderFooterDialog';
 import { MenuBar } from './components/MenuBar';
@@ -100,6 +102,7 @@ export function App() {
   const [findReplaceOpen, setFindReplaceOpen] = useState(false);
   const [headerFooterOpen, setHeaderFooterOpen] = useState(false);
   const [footnotesOpen, setFootnotesOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const [stats, setStats] = useState<WordStats>({
     words: 0,
     characters: 0,
@@ -271,6 +274,11 @@ export function App() {
           onSelect: () => setFootnotesOpen(true),
         },
         {
+          label: 'Comments…',
+          icon: <MessageSquare {...menuIconProps} />,
+          onSelect: () => setCommentsOpen(true),
+        },
+        {
           label: 'Find',
           shortcut: 'Ctrl+F',
           icon: <Search {...menuIconProps} />,
@@ -385,6 +393,15 @@ export function App() {
           if (editor) updateDocSettings(editor, { footnotes: items });
         }}
         onClose={() => setFootnotesOpen(false)}
+      />
+      <CommentsDialog
+        editor={editor}
+        open={commentsOpen}
+        comments={docSettings.comments}
+        onApply={(items) => {
+          if (editor) updateDocSettings(editor, { comments: items });
+        }}
+        onClose={() => setCommentsOpen(false)}
       />
     </div>
   );

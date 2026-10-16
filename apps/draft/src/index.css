@@ -216,6 +216,17 @@
   counter-reset: gdfn 0;
 }
 
+.gd-comment {
+  background: rgba(234, 179, 8, 0.25);
+  border-bottom: 2px dotted rgba(234, 179, 8, 0.8);
+}
+
+@media print {
+  .gd-comment {
+    background: rgba(234, 179, 8, 0.15) !important;
+  }
+}
+
 sup[data-footnote-id] {
   counter-increment: gdfn;
   cursor: pointer;

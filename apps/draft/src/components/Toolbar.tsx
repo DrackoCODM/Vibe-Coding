@@ -19,6 +19,7 @@ import {
   ListChecks,
   ListOrdered,
   Merge,
+  MessageSquare,
   Minus,
   Quote,
   Redo2,
@@ -219,6 +220,14 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor?.chain().focus().unsetHighlight().run()}
       >
         <Eraser {...iconProps} />
+      </ToolbarButton>
+      <ToolbarButton
+        aria-label="Add comment"
+        title="Add comment"
+        disabled={disabled}
+        onClick={() => editor?.chain().focus().addComment().run()}
+      >
+        <MessageSquare {...iconProps} />
       </ToolbarButton>
       <ToolbarSeparator />
 

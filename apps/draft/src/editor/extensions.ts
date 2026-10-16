@@ -7,6 +7,7 @@ import TaskList from '@tiptap/extension-task-list';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyleKit } from '@tiptap/extension-text-style/text-style-kit';
 import StarterKit from '@tiptap/starter-kit';
+import { CommentMark } from './comments';
 import { GratisDoc } from './doc';
 import { FootnoteRef } from './footnotes';
 import { ImageWithAlign } from './images';
@@ -33,6 +34,7 @@ export function getEditorExtensions(): Extensions {
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
     Subscript,
     Superscript,
+    CommentMark,
     TaskList,
     TaskItem.configure({ nested: true }),
     TableWithShading.configure({ resizable: true }),

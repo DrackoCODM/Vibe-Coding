@@ -3,6 +3,7 @@ import { NodeSelection } from '@tiptap/pm/state';
 import { CellSelection } from '@tiptap/pm/tables';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DEFAULT_DOC_SETTINGS, readDocSettings, updateDocSettings } from './doc';
+import { CommentMark, removeComment } from './comments';
 import { removeFootnote } from './footnotes';
 import { getEditorExtensions } from './extensions';
 
@@ -274,5 +275,28 @@ describe('document settings', () => {
       }
     });
     expect(remainingRefs).toBe(0);
+  });
+
+  it('adds a comment mark on a selection and registers the comment', () => {
+    const ed = createEditor('<p>Hello world</p>');
+    ed.commands.setTextSelection({ from: 7, to: 12 });
+    expect(ed.commands.addComment()).toBe(true);
+    const settings = readDocSettings(ed.state.doc);
+    expect(settings.comments).toHaveLength(1);
+    expect(settings.comments[0].author).toBe('Me');
+    expect(ed.getHTML()).toContain('data-comment-id');
+    expect(ed.getHTML()).toContain('gd-comment');
+    expect(CommentMark).toBeTruthy();
+  });
+
+  it('removes a comment mark and its entry', () => {
+    const ed = createEditor('<p>Hello world</p>');
+    ed.commands.setTextSelection({ from: 7, to: 12 });
+    ed.commands.addComment();
+    const [comment] = readDocSettings(ed.state.doc).comments;
+    removeComment(ed, comment.id);
+    const after = readDocSettings(ed.state.doc);
+    expect(after.comments).toHaveLength(0);
+    expect(ed.getHTML()).not.toContain('data-comment-id');
   });
 });

@@ -75,6 +75,19 @@ describe('App shell', () => {
     expect(screen.queryByTestId('footnotes-dialog')).toBeNull();
   });
 
+  it('opens the comments dialog with an empty state', async () => {
+    render(<App />);
+    expect(screen.getByLabelText('Add comment')).toBeTruthy();
+    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Comments…'));
+    expect(screen.getByRole('dialog', { name: 'Comments' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Comments' }).textContent).toContain(
+      'No comments yet',
+    );
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(screen.queryByTestId('comments-dialog')).toBeNull();
+  });
+
   it('defaults to dark theme and toggles the dark class on the html element', () => {
     localStorage.removeItem('gratisdraft.theme');
     render(<App />);
