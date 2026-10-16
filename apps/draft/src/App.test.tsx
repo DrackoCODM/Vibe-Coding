@@ -95,6 +95,34 @@ describe('App shell', () => {
     expect(screen.getByLabelText('Document content').querySelector('[data-toc]')).toBeTruthy();
   });
 
+  it('opens the left Outline panel from the View menu', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('View'));
+    fireEvent.click(screen.getByText('Outline panel'));
+    expect(screen.getByTestId('left-sidebar')).toBeTruthy();
+    expect(screen.getByTestId('left-sidebar').textContent).toContain('No headings yet');
+    fireEvent.click(screen.getByLabelText('Close left panel'));
+    expect(screen.queryByTestId('left-sidebar')).toBeNull();
+  });
+
+  it('opens the Styles panel and applies a preset', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('View'));
+    fireEvent.click(screen.getByText('Styles panel'));
+    expect(screen.getByTestId('preset-title')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('preset-title'));
+    expect(screen.getByLabelText('Document content').querySelector('h1')).toBeTruthy();
+  });
+
+  it('shows document state and a zoom slider in the status bar', async () => {
+    render(<App />);
+    await screen.findByRole('textbox', { name: 'Document content' });
+    expect(screen.getByTestId('doc-state').textContent).toBe('Saved');
+    const slider = screen.getByLabelText('Zoom slider');
+    fireEvent.change(slider, { target: { value: '150' } });
+    expect(screen.getByTestId('zoom-level').textContent).toBe('150%');
+  });
+
   it('has a style preset select and opens the character dialog', async () => {
     render(<App />);
     expect(screen.getByLabelText('Style preset')).toBeTruthy();

@@ -48,6 +48,8 @@ import { HeaderFooterDialog } from './components/HeaderFooterDialog';
 import { MenuBar } from './components/MenuBar';
 import { PageSetupBar, type PageSetup } from './components/PageSetupBar';
 import { Ruler } from './components/Ruler';
+import { LeftSidebar } from './components/LeftSidebar';
+import { RightSidebar } from './components/RightSidebar';
 import { StatusBar } from './components/StatusBar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Toolbar } from './components/Toolbar';
@@ -127,6 +129,10 @@ export function App() {
   const [crossRefOpen, setCrossRefOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [citationOpen, setCitationOpen] = useState(false);
+  const [leftPanelOpen, setLeftPanelOpen] = useState(false);
+  const [leftTab, setLeftTab] = useState<'outline' | 'styles'>('outline');
+  const [rightPanelOpen, setRightPanelOpen] = useState(false);
+  const [rightTab, setRightTab] = useState<'comments' | 'references'>('comments');
   const [stats, setStats] = useState<WordStats>({
     words: 0,
     characters: 0,
@@ -452,6 +458,39 @@ export function App() {
           icon: darkMode ? <Sun {...menuIconProps} /> : <Moon {...menuIconProps} />,
           onSelect: toggleTheme,
         },
+        { label: 'sep-view', separator: true, onSelect: () => undefined },
+        {
+          label: 'Outline panel',
+          icon: <ListTree {...menuIconProps} />,
+          onSelect: () => {
+            setLeftTab('outline');
+            setLeftPanelOpen(true);
+          },
+        },
+        {
+          label: 'Styles panel',
+          icon: <Type {...menuIconProps} />,
+          onSelect: () => {
+            setLeftTab('styles');
+            setLeftPanelOpen(true);
+          },
+        },
+        {
+          label: 'Comments panel',
+          icon: <MessageSquare {...menuIconProps} />,
+          onSelect: () => {
+            setRightTab('comments');
+            setRightPanelOpen(true);
+          },
+        },
+        {
+          label: 'References panel',
+          icon: <Link2 {...menuIconProps} />,
+          onSelect: () => {
+            setRightTab('references');
+            setRightPanelOpen(true);
+          },
+        },
       ],
     },
     {
@@ -514,20 +553,42 @@ export function App() {
         zoomPercent={pageSetup.zoomPercent}
         orientation={docSettings.orientation}
       />
-      <main className="flex-1 overflow-auto p-8">
-        <EditorPage
-          editor={editor}
-          pageSize={pageSetup.pageSize}
-          margins={MARGIN_PRESETS[pageSetup.marginPreset]}
-          zoomPercent={pageSetup.zoomPercent}
-          orientation={docSettings.orientation}
-          columns={docSettings.columns}
-          watermarkText={docSettings.watermarkText}
-          headerText={docSettings.headerText}
-          footerText={docSettings.footerText}
-          footnotes={docSettings.footnotes}
-          onPageChange={handlePageChange}
-        />
+      <main className="flex flex-1 overflow-hidden">
+        {leftPanelOpen && (
+          <LeftSidebar
+            editor={editor}
+            tab={leftTab}
+            onTabChange={setLeftTab}
+            onClose={() => setLeftPanelOpen(false)}
+          />
+        )}
+        <div className="flex-1 overflow-auto p-8">
+          <EditorPage
+            editor={editor}
+            pageSize={pageSetup.pageSize}
+            margins={MARGIN_PRESETS[pageSetup.marginPreset]}
+            zoomPercent={pageSetup.zoomPercent}
+            orientation={docSettings.orientation}
+            columns={docSettings.columns}
+            watermarkText={docSettings.watermarkText}
+            headerText={docSettings.headerText}
+            footerText={docSettings.footerText}
+            footnotes={docSettings.footnotes}
+            onPageChange={handlePageChange}
+          />
+        </div>
+        {rightPanelOpen && (
+          <RightSidebar
+            editor={editor}
+            comments={docSettings.comments}
+            onCommentsChange={(items) => {
+              if (editor) updateDocSettings(editor, { comments: items });
+            }}
+            tab={rightTab}
+            onTabChange={setRightTab}
+            onClose={() => setRightPanelOpen(false)}
+          />
+        )}
       </main>
       <StatusBar
         wordCount={stats.words}
@@ -535,6 +596,8 @@ export function App() {
         currentPage={pageInfo.current}
         pageCount={pageInfo.total}
         zoomPercent={pageSetup.zoomPercent}
+        onZoomChange={(percent) => setPageSetup((prev) => ({ ...prev, zoomPercent: percent }))}
+        docState={files.dirty ? 'Unsaved changes' : 'Saved'}
       />
       <HeaderFooterDialog
         open={headerFooterOpen}

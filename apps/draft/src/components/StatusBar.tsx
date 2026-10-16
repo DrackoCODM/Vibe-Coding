@@ -4,6 +4,10 @@ export interface StatusBarProps {
   currentPage: number;
   pageCount: number;
   zoomPercent?: number;
+  /** Show a slider instead of the read-only zoom label. */
+  onZoomChange?: (percent: number) => void;
+  /** Document save state shown near the word count. */
+  docState?: string;
 }
 
 export function StatusBar({
@@ -12,6 +16,8 @@ export function StatusBar({
   currentPage,
   pageCount,
   zoomPercent,
+  onZoomChange,
+  docState,
 }: StatusBarProps) {
   return (
     <footer
@@ -20,6 +26,24 @@ export function StatusBar({
     >
       <div className="flex items-center gap-3" data-testid="status-feedback" />
       <div className="flex items-center gap-3">
+        {docState && (
+          <span data-testid="doc-state" className="tabular-nums">
+            {docState}
+          </span>
+        )}
+        {zoomPercent !== undefined && onZoomChange && (
+          <input
+            aria-label="Zoom slider"
+            data-testid="zoom-slider"
+            type="range"
+            min={50}
+            max={200}
+            step={10}
+            value={zoomPercent}
+            className="w-24 accent-[rgb(var(--accent))]"
+            onChange={(e) => onZoomChange(Number(e.target.value))}
+          />
+        )}
         {zoomPercent !== undefined && (
           <span data-testid="zoom-level" className="tabular-nums">
             {zoomPercent}%
