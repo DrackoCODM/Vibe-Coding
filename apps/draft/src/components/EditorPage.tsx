@@ -86,7 +86,7 @@ export function EditorPage({
         aria-label="Page canvas"
         data-page-size={pageSize}
         data-page-count={pageCount}
-        className="page relative origin-top bg-white shadow-lg dark:bg-gray-100"
+        className="page relative origin-top rounded-sm bg-white text-zinc-900 shadow-page"
         style={{
           width: pageWidthPx,
           minHeight: sheetHeightPx,
@@ -107,7 +107,7 @@ export function EditorPage({
               key={y}
               aria-hidden="true"
               data-testid="page-break"
-              className="page-break-marker pointer-events-none absolute left-0 right-0 border-t-2 border-dashed border-blue-300"
+              className="page-break-marker pointer-events-none absolute left-0 right-0 border-t border-dashed border-sky-300/70"
               style={{ top: y }}
             />
           ))}
