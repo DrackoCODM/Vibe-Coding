@@ -15,19 +15,17 @@ export interface PageSetupBarProps {
 }
 
 export function PageSetupBar({ setup, onChange }: PageSetupBarProps) {
-  const selectClass =
-    'gratis-focus-ring rounded border border-gray-300 bg-white px-1 py-0.5 text-sm dark:border-gray-600 dark:bg-gray-900';
   return (
     <div
       role="toolbar"
       aria-label="Page setup"
-      className="flex items-center gap-3 border-b border-gray-300 bg-white px-3 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+      className="flex items-center gap-3 border-b border-line bg-raised px-3 py-1.5 text-xs"
     >
-      <label className="flex items-center gap-1">
+      <label className="flex items-center gap-1.5 text-muted">
         Size
         <select
           aria-label="Page size"
-          className={selectClass}
+          className="gratis-select"
           value={setup.pageSize}
           onChange={(e) => onChange({ ...setup, pageSize: e.target.value as PageSizeName })}
         >
@@ -35,11 +33,11 @@ export function PageSetupBar({ setup, onChange }: PageSetupBarProps) {
           <option value="letter">Letter</option>
         </select>
       </label>
-      <label className="flex items-center gap-1">
+      <label className="flex items-center gap-1.5 text-muted">
         Margins
         <select
           aria-label="Margin preset"
-          className={selectClass}
+          className="gratis-select"
           value={setup.marginPreset}
           onChange={(e) => onChange({ ...setup, marginPreset: e.target.value as MarginPresetName })}
         >
@@ -49,11 +47,11 @@ export function PageSetupBar({ setup, onChange }: PageSetupBarProps) {
           <option value="wide">Wide</option>
         </select>
       </label>
-      <label className="flex items-center gap-1">
+      <label className="flex items-center gap-1.5 text-muted">
         Zoom
         <select
           aria-label="Zoom"
-          className={selectClass}
+          className="gratis-select"
           value={setup.zoomPercent}
           onChange={(e) => onChange({ ...setup, zoomPercent: Number(e.target.value) })}
         >
@@ -64,7 +62,7 @@ export function PageSetupBar({ setup, onChange }: PageSetupBarProps) {
           ))}
         </select>
       </label>
-      <span className="text-xs text-gray-500 dark:text-gray-400">
+      <span className="text-2xs text-faint">
         {MARGIN_PRESETS[setup.marginPreset].topMm === MARGIN_PRESETS[setup.marginPreset].leftMm
           ? `${MARGIN_PRESETS[setup.marginPreset].topMm} mm margins`
           : 'Mixed margins'}

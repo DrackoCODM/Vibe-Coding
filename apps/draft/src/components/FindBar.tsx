@@ -1,4 +1,5 @@
 import type { Editor } from '@tiptap/react';
+import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import {
   findDocMatches,
@@ -104,14 +105,14 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
     <div
       role="search"
       aria-label="Find and replace"
-      className="flex flex-wrap items-center gap-2 border-b border-gray-300 bg-white px-3 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+      className="flex flex-wrap items-center gap-2 border-b border-line bg-raised px-3 py-1.5 text-xs"
     >
       <input
         ref={inputRef}
         type="text"
         aria-label="Find"
         placeholder="Find"
-        className="gratis-focus-ring w-44 rounded border border-gray-300 px-2 py-0.5 dark:border-gray-600 dark:bg-gray-800"
+        className="gratis-input w-48 rounded-full"
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -130,51 +131,55 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
       <span
         aria-live="polite"
         data-testid="find-count"
-        className="min-w-20 text-gray-500 dark:text-gray-400"
+        className="min-w-20 text-2xs tabular-nums text-faint"
       >
         {countLabel}
       </span>
-      <button
-        type="button"
-        aria-label="Previous match"
-        className="gratis-focus-ring rounded border border-gray-300 px-2 py-0.5 disabled:opacity-50 dark:border-gray-600"
-        disabled={matches.length === 0}
-        onClick={goPrevious}
-      >
-        ↑
-      </button>
-      <button
-        type="button"
-        aria-label="Next match"
-        className="gratis-focus-ring rounded border border-gray-300 px-2 py-0.5 disabled:opacity-50 dark:border-gray-600"
-        disabled={matches.length === 0}
-        onClick={goNext}
-      >
-        ↓
-      </button>
-      <label className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
+        <button
+          type="button"
+          aria-label="Previous match"
+          className="gratis-focus-ring inline-flex h-6 w-6 items-center justify-center rounded-md text-muted transition-colors duration-fast hover:bg-ink/5 hover:text-ink disabled:opacity-40"
+          disabled={matches.length === 0}
+          onClick={goPrevious}
+        >
+          <ChevronUp size={14} />
+        </button>
+        <button
+          type="button"
+          aria-label="Next match"
+          className="gratis-focus-ring inline-flex h-6 w-6 items-center justify-center rounded-md text-muted transition-colors duration-fast hover:bg-ink/5 hover:text-ink disabled:opacity-40"
+          disabled={matches.length === 0}
+          onClick={goNext}
+        >
+          <ChevronDown size={14} />
+        </button>
+      </div>
+      <label className="flex select-none items-center gap-1.5 text-muted">
         <input
           type="checkbox"
           aria-label="Match case"
           checked={caseSensitive}
+          className="gratis-focus-ring accent-accent"
           onChange={(e) => {
             setCaseSensitive(e.target.checked);
             search(query, { ...options(), caseSensitive: e.target.checked });
           }}
         />
-        <span>Match case</span>
+        Match case
       </label>
-      <label className="flex items-center gap-1">
+      <label className="flex select-none items-center gap-1.5 text-muted">
         <input
           type="checkbox"
           aria-label="Whole words"
           checked={wholeWord}
+          className="gratis-focus-ring accent-accent"
           onChange={(e) => {
             setWholeWord(e.target.checked);
             search(query, { ...options(), wholeWord: e.target.checked });
           }}
         />
-        <span>Whole words</span>
+        Whole words
       </label>
       {showReplace && (
         <>
@@ -182,7 +187,7 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
             type="text"
             aria-label="Replace with"
             placeholder="Replace with"
-            className="gratis-focus-ring w-44 rounded border border-gray-300 px-2 py-0.5 dark:border-gray-600 dark:bg-gray-800"
+            className="gratis-input w-48 rounded-full"
             value={replacement}
             onChange={(e) => setReplacement(e.target.value)}
             onKeyDown={(e) => {
@@ -196,7 +201,7 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
           />
           <button
             type="button"
-            className="gratis-focus-ring rounded border border-gray-300 px-2 py-0.5 disabled:opacity-50 dark:border-gray-600"
+            className="gratis-focus-ring rounded-md border border-line px-2 py-1 text-muted transition-colors duration-fast hover:bg-ink/5 hover:text-ink disabled:opacity-40"
             disabled={matches.length === 0}
             onClick={handleReplace}
           >
@@ -204,7 +209,7 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
           </button>
           <button
             type="button"
-            className="gratis-focus-ring rounded border border-gray-300 px-2 py-0.5 disabled:opacity-40 dark:border-gray-600"
+            className="gratis-focus-ring rounded-md border border-line px-2 py-1 text-muted transition-colors duration-fast hover:bg-ink/5 hover:text-ink disabled:opacity-40"
             disabled={query === ''}
             onClick={handleReplaceAll}
           >
@@ -215,10 +220,10 @@ export function FindBar({ editor, open, showReplace, onClose }: FindBarProps) {
       <button
         type="button"
         aria-label="Close find bar"
-        className="gratis-focus-ring ml-auto rounded border border-gray-300 px-2 py-0.5 dark:border-gray-600"
+        className="gratis-focus-ring ml-auto inline-flex h-6 w-6 items-center justify-center rounded-md text-muted transition-colors duration-fast hover:bg-ink/5 hover:text-ink"
         onClick={onClose}
       >
-        ✕
+        <X size={14} />
       </button>
     </div>
   );

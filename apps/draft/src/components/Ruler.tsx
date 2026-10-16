@@ -31,22 +31,22 @@ export function Ruler({ pageSize, margins, zoomPercent }: RulerProps) {
   const ticks = rulerTicks(page.widthMm);
 
   return (
-    <div className="overflow-x-auto border-b border-gray-300 bg-white px-3 py-1 dark:border-gray-700 dark:bg-gray-900">
+    <div data-ruler-strip="" className="border-b border-line bg-raised/60 px-3 py-1">
       <div
         role="img"
         data-testid="ruler"
         aria-label={`Horizontal ruler, ${pageSize.toUpperCase()}, ${zoomPercent} percent zoom`}
-        className="relative mx-auto h-5 border border-gray-400 bg-white dark:border-gray-500 dark:bg-gray-100"
+        className="relative mx-auto h-4 rounded-sm bg-white/60 dark:bg-white/5"
         style={{ width: widthPx }}
       >
         <div
           aria-hidden="true"
-          className="absolute inset-y-0 left-0 bg-gray-200 dark:bg-gray-300"
+          className="absolute inset-y-0 left-0 bg-ink/[0.06]"
           style={{ width: leftPx }}
         />
         <div
           aria-hidden="true"
-          className="absolute inset-y-0 right-0 bg-gray-200 dark:bg-gray-300"
+          className="absolute inset-y-0 right-0 bg-ink/[0.06]"
           style={{ width: rightPx }}
         />
         {ticks.map((tick) => (
@@ -55,9 +55,7 @@ export function Ruler({ pageSize, margins, zoomPercent }: RulerProps) {
             data-mm={tick.mm}
             aria-hidden="true"
             className={`absolute bottom-0 w-px ${
-              tick.major
-                ? 'h-2.5 bg-gray-600 dark:bg-gray-400'
-                : 'h-1.5 bg-gray-400 dark:bg-gray-500'
+              tick.major ? 'h-2 bg-muted/70' : 'h-1 bg-muted/35'
             }`}
             style={{ left: tick.mm * pxPerMm }}
           />
@@ -68,7 +66,7 @@ export function Ruler({ pageSize, margins, zoomPercent }: RulerProps) {
             <span
               key={`label-${tick.mm}`}
               aria-hidden="true"
-              className="absolute top-0 -translate-x-1/2 text-[9px] leading-none text-gray-500 dark:text-gray-500"
+              className="absolute top-0 -translate-x-1/2 text-2xs leading-none text-faint"
               style={{ left: tick.mm * pxPerMm }}
             >
               {tick.mm / 10}
