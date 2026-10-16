@@ -1,6 +1,24 @@
 import mammoth from 'mammoth';
-import { BorderStyle, Document, HeadingLevel, Packer, PageBreak, Paragraph, TextRun } from 'docx';
+import {
+  BorderStyle,
+  Document,
+  Footer,
+  Header,
+  HeadingLevel,
+  PageBreak,
+  PageOrientation,
+  Packer,
+  Paragraph,
+  TextRun,
+} from 'docx';
+import type { ISectionOptions } from 'docx';
 import type { ExportBlock, TextRun as BlockRun } from './types';
+
+export interface DocxExportOptions {
+  headerText?: string;
+  footerText?: string;
+  orientation?: 'portrait' | 'landscape';
+}
 
 /** Convert a .docx file (ArrayBuffer) to an HTML fragment. */
 export async function docxToHtml(buffer: ArrayBuffer): Promise<string> {
@@ -43,7 +61,10 @@ function headingLevelFor(level: number): HeadingLevelValue {
 }
 
 /** Convert document blocks to a .docx file (returns the file bytes). */
-export async function blocksToDocx(blocks: ExportBlock[]): Promise<Uint8Array> {
+export async function blocksToDocx(
+  blocks: ExportBlock[],
+  options: DocxExportOptions = {},
+): Promise<Uint8Array> {
   const children: Paragraph[] = [];
   for (const block of blocks) {
     switch (block.type) {
@@ -91,6 +112,27 @@ export async function blocksToDocx(blocks: ExportBlock[]): Promise<Uint8Array> {
         break;
     }
   }
-  const doc = new Document({ sections: [{ children }] });
+  const landscape = options.orientation === 'landscape';
+  const textParagraph = (text: string) =>
+    new Paragraph({ children: [new TextRun({ text, font: 'Calibri' })] });
+  const section: ISectionOptions = {
+    properties: {
+      page: {
+        size: {
+          width: landscape ? 16838 : 11906,
+          height: landscape ? 11906 : 16838,
+          orientation: landscape ? PageOrientation.LANDSCAPE : PageOrientation.PORTRAIT,
+        },
+      },
+    },
+    children,
+    ...(options.headerText
+      ? { headers: { default: new Header({ children: [textParagraph(options.headerText)] }) } }
+      : {}),
+    ...(options.footerText
+      ? { footers: { default: new Footer({ children: [textParagraph(options.footerText)] }) } }
+      : {}),
+  };
+  const doc = new Document({ sections: [section] });
   return Packer.toBuffer(doc);
 }

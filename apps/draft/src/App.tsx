@@ -8,6 +8,7 @@ import {
   FileText,
   FolderOpen,
   Moon,
+  PanelTop,
   Printer,
   Redo2,
   Replace,
@@ -20,6 +21,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { EditorPage } from './components/EditorPage';
 import { FindBar } from './components/FindBar';
+import { HeaderFooterDialog } from './components/HeaderFooterDialog';
 import { MenuBar } from './components/MenuBar';
 import { PageSetupBar, type PageSetup } from './components/PageSetupBar';
 import { Ruler } from './components/Ruler';
@@ -27,7 +29,12 @@ import { StatusBar } from './components/StatusBar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Toolbar } from './components/Toolbar';
 import { getEditorExtensions } from './editor/extensions';
-import { DEFAULT_DOC_SETTINGS, readDocSettings, type DocSettings } from './editor/doc';
+import {
+  DEFAULT_DOC_SETTINGS,
+  readDocSettings,
+  updateDocSettings,
+  type DocSettings,
+} from './editor/doc';
 import { imageFilesFromDataTransfer, isImageFile, readFileAsDataUrl } from './editor/images';
 import { countWords, getDocText, type WordStats } from './editor/stats';
 import { useFileHandlers } from './files/useFileHandlers';
@@ -88,6 +95,7 @@ export function App() {
   const files = useFileHandlers(editor);
   const [findOpen, setFindOpen] = useState(false);
   const [findReplaceOpen, setFindReplaceOpen] = useState(false);
+  const [headerFooterOpen, setHeaderFooterOpen] = useState(false);
   const [stats, setStats] = useState<WordStats>({
     words: 0,
     characters: 0,
@@ -244,6 +252,11 @@ export function App() {
       label: 'Edit',
       items: [
         {
+          label: 'Header and footer…',
+          icon: <PanelTop {...menuIconProps} />,
+          onSelect: () => setHeaderFooterOpen(true),
+        },
+        {
           label: 'Find',
           shortcut: 'Ctrl+F',
           icon: <Search {...menuIconProps} />,
@@ -328,6 +341,8 @@ export function App() {
           orientation={docSettings.orientation}
           columns={docSettings.columns}
           watermarkText={docSettings.watermarkText}
+          headerText={docSettings.headerText}
+          footerText={docSettings.footerText}
           onPageChange={handlePageChange}
         />
       </main>
@@ -337,6 +352,15 @@ export function App() {
         currentPage={pageInfo.current}
         pageCount={pageInfo.total}
         zoomPercent={pageSetup.zoomPercent}
+      />
+      <HeaderFooterDialog
+        open={headerFooterOpen}
+        settings={docSettings}
+        onApply={(headerText, footerText) => {
+          if (editor) updateDocSettings(editor, { headerText, footerText });
+          setHeaderFooterOpen(false);
+        }}
+        onClose={() => setHeaderFooterOpen(false)}
       />
     </div>
   );

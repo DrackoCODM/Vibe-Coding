@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { App } from './App';
 
@@ -41,6 +41,21 @@ describe('App shell', () => {
     await screen.findByRole('textbox', { name: 'Document content' });
     fireEvent.click(screen.getByLabelText('Insert page break'));
     expect(container.querySelector('[data-page-break]')).toBeTruthy();
+  });
+
+  it('edits headers and footers in a dialog and shows them on the page', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Header and footer…'));
+    expect(screen.getByRole('dialog', { name: 'Header and footer' })).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Header text'), { target: { value: 'My Header' } });
+    fireEvent.change(screen.getByLabelText('Footer text'), { target: { value: 'My Footer' } });
+    fireEvent.click(screen.getByText('Apply'));
+    await waitFor(() => {
+      expect(screen.getByTestId('page-header').textContent).toBe('My Header');
+    });
+    expect(screen.getByTestId('page-footer').textContent).toBe('My Footer');
+    expect(screen.queryByTestId('header-footer-dialog')).toBeNull();
   });
 
   it('defaults to dark theme and toggles the dark class on the html element', () => {

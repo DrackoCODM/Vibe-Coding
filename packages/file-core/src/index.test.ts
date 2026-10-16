@@ -1,3 +1,4 @@
+import { inflateRawSync } from 'node:zlib';
 import { Document, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
 import { describe, expect, it } from 'vitest';
 import {
@@ -15,6 +16,30 @@ import {
   serializeGdraft,
   type PmNodeLike,
 } from './index';
+
+/** Minimal zip reader: return the uncompressed text of one stored/deflated entry. */
+function readZipEntry(bytes: Uint8Array, targetName: string): string {
+  const buf = Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  let offset = 0;
+  while (offset < buf.length - 4) {
+    if (buf.readUInt32LE(offset) !== 0x04034b50) {
+      offset += 1;
+      continue;
+    }
+    const method = buf.readUInt16LE(offset + 8);
+    const compressedSize = buf.readUInt32LE(offset + 18);
+    const nameLength = buf.readUInt16LE(offset + 26);
+    const extraLength = buf.readUInt16LE(offset + 28);
+    const name = buf.subarray(offset + 30, offset + 30 + nameLength).toString('utf8');
+    const dataStart = offset + 30 + nameLength + extraLength;
+    if (name === targetName) {
+      const data = buf.subarray(dataStart, dataStart + compressedSize);
+      return method === 0 ? data.toString('utf8') : inflateRawSync(data).toString('utf8');
+    }
+    offset = dataStart + compressedSize;
+  }
+  throw new Error(`Zip entry not found: ${targetName}`);
+}
 
 describe('.gdraft', () => {
   it('round-trips a document', () => {
@@ -96,6 +121,20 @@ describe('docx', () => {
     ]);
     expect(bytes.byteLength).toBeGreaterThan(100);
     expect(bytes[0]).toBe(0x50);
+  });
+
+  it('exports orientation and header/footer text into the section', async () => {
+    const bytes = await blocksToDocx([{ type: 'paragraph', runs: [] }], {
+      orientation: 'landscape',
+      headerText: 'Confidential',
+      footerText: 'Acme Corp',
+    });
+    const documentXml = readZipEntry(bytes, 'word/document.xml');
+    const headerXml = readZipEntry(bytes, 'word/header1.xml');
+    const footerXml = readZipEntry(bytes, 'word/footer1.xml');
+    expect(headerXml).toContain('Confidential');
+    expect(footerXml).toContain('Acme Corp');
+    expect(documentXml).toContain('orient="landscape"');
   });
 
   it('imports a docx fixture to html', async () => {

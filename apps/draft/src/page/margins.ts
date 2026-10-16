@@ -13,3 +13,6 @@ export const MARGIN_PRESETS = {
 } as const satisfies Record<string, Margins>;
 
 export type MarginPresetName = keyof typeof MARGIN_PRESETS;
+
+/** Distance from the page edge where headers and footers sit (Word default 12.7 mm). */
+export const HEADER_DISTANCE_MM = 12.7;

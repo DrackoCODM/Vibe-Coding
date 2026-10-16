@@ -11,6 +11,7 @@ import {
 } from '@gratis/file-core';
 import { GDRAFT_FILE_EXTENSION } from '@gratis/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { readDocSettings } from '../editor/doc';
 import { buildImportContent } from './importContent';
 import { downloadBlob, pickFileToOpen, pickSaveDestination } from './io';
 
@@ -206,7 +207,12 @@ export function useFileHandlers(editor: Editor | null): FileHandlers {
         );
         return;
       }
-      const bytes = await blocksToDocx(pmJsonToBlocks(editor.getJSON()));
+      const settings = readDocSettings(editor.state.doc);
+      const bytes = await blocksToDocx(pmJsonToBlocks(editor.getJSON()), {
+        headerText: settings.headerText || undefined,
+        footerText: settings.footerText || undefined,
+        orientation: settings.orientation,
+      });
       const buffer = bytes.buffer.slice(
         bytes.byteOffset,
         bytes.byteOffset + bytes.byteLength,

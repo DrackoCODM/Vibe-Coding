@@ -4,6 +4,7 @@ import { mmToPx, PAGE_SIZES } from '@gratis/shared';
 import { useEffect, useMemo, useState } from 'react';
 import type { PageOrientation } from '../editor/doc';
 import type { Margins } from '../page/margins';
+import { HEADER_DISTANCE_MM } from '../page/margins';
 import { computePageLayout, pageForLayout } from '../page/pagination';
 
 export interface EditorPageProps {
@@ -14,6 +15,8 @@ export interface EditorPageProps {
   orientation?: PageOrientation;
   columns?: 1 | 2 | 3;
   watermarkText?: string;
+  headerText?: string;
+  footerText?: string;
   onPageChange?: (current: number, total: number) => void;
 }
 
@@ -25,6 +28,8 @@ export function EditorPage({
   orientation = 'portrait',
   columns = 1,
   watermarkText = '',
+  headerText = '',
+  footerText = '',
   onPageChange,
 }: EditorPageProps) {
   const base = PAGE_SIZES[pageSize];
@@ -118,6 +123,11 @@ export function EditorPage({
         (_, i) => margin.top + layout.pageStartsPx[i] + 0.5 * usableHeightPx,
       )
     : [];
+  const headerTopPx = Math.min(mmToPx(HEADER_DISTANCE_MM), margin.top * 0.5);
+  const footerOffsetPx = Math.min(mmToPx(HEADER_DISTANCE_MM), margin.bottom * 0.5);
+  const showHeader = headerText.trim().length > 0;
+  const showFooter = footerText.trim().length > 0;
+  const pages = Array.from({ length: pageCount }, (_, i) => i);
 
   return (
     <div
@@ -144,6 +154,38 @@ export function EditorPage({
           marginLeft: (pageWidthPx * zoom - pageWidthPx) / 2 / zoom,
         }}
       >
+        {pages.map((i) => (
+          <span key={`hf-${i}`}>
+            {showHeader && (
+              <div
+                data-testid={i === 0 ? 'page-header' : undefined}
+                aria-label={`Header page ${i + 1}`}
+                className="pointer-events-none absolute select-none text-xs leading-tight text-ink/70"
+                style={{
+                  top: i * pageHeightPx + headerTopPx,
+                  left: margin.left,
+                  width: usableWidthPx,
+                }}
+              >
+                {headerText}
+              </div>
+            )}
+            {showFooter && (
+              <div
+                data-testid={i === 0 ? 'page-footer' : undefined}
+                aria-label={`Footer page ${i + 1}`}
+                className="pointer-events-none absolute select-none text-xs leading-tight text-ink/70"
+                style={{
+                  top: (i + 1) * pageHeightPx - footerOffsetPx - 14,
+                  left: margin.left,
+                  width: usableWidthPx,
+                }}
+              >
+                {footerText}
+              </div>
+            )}
+          </span>
+        ))}
         {watermarks.map((y, i) => (
           <div
             key={`watermark-${i}`}
