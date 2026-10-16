@@ -3,6 +3,7 @@ import { NodeSelection } from '@tiptap/pm/state';
 import { CellSelection } from '@tiptap/pm/tables';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DEFAULT_DOC_SETTINGS, readDocSettings, updateDocSettings } from './doc';
+import { removeFootnote } from './footnotes';
 import { getEditorExtensions } from './extensions';
 
 let editor: Editor | null = null;
@@ -235,5 +236,43 @@ describe('document settings', () => {
     ed.commands.setPageBreak();
     expect(ed.getJSON().content?.some((n) => n.type === 'pageBreak')).toBe(true);
     expect(ed.getHTML()).toContain('data-page-break');
+  });
+
+  it('adds footnotes with a reference node and a registered note', () => {
+    const ed = createEditor();
+    ed.commands.addFootnote();
+    const json = ed.getJSON();
+    const hasRef = json.content?.some((node) =>
+      node.content?.some((child) => child.type === 'footnoteRef'),
+    );
+    expect(hasRef).toBe(true);
+    expect(ed.getHTML()).toContain('data-footnote-id');
+    const settings = readDocSettings(ed.state.doc);
+    expect(settings.footnotes).toHaveLength(1);
+    expect(settings.footnotes[0].text).toBe('');
+  });
+
+  it('removes a footnote with its references and note', () => {
+    const ed = createEditor();
+    ed.commands.addFootnote();
+    updateDocSettings(ed, { footnotes: [{ id: 'fn-test', text: 'Hello note' }] });
+    ed.commands.addFootnote();
+    const notes = readDocSettings(ed.state.doc).footnotes;
+    expect(notes).toHaveLength(2);
+    const target = notes.find((note) => note.id === 'fn-test');
+    expect(target).toBeTruthy();
+    removeFootnote(ed, 'fn-test');
+    const after = readDocSettings(ed.state.doc);
+    expect(after.footnotes.some((note) => note.id === 'fn-test')).toBe(false);
+    let remainingRefs = 0;
+    ed.state.doc.descendants((node) => {
+      if (
+        node.type.name === 'footnoteRef' &&
+        (node.attrs as Record<string, unknown>).noteId === 'fn-test'
+      ) {
+        remainingRefs += 1;
+      }
+    });
+    expect(remainingRefs).toBe(0);
   });
 });

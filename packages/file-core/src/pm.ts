@@ -15,6 +15,11 @@ function collectRuns(node: PmNodeLike, marks: Set<string> = new Set()): TextRun[
       },
     ];
   }
+  if (node.type === 'footnoteRef') {
+    return [
+      { text: '', footnoteId: typeof node.attrs?.noteId === 'string' ? node.attrs.noteId : '' },
+    ];
+  }
   return (node.content ?? []).flatMap((child) => collectRuns(child, nextMarks));
 }
 
@@ -28,7 +33,8 @@ function joinRuns(runs: TextRun[]): TextRun[] {
       last.italic === run.italic &&
       last.underline === run.underline &&
       last.strike === run.strike &&
-      last.code === run.code
+      last.code === run.code &&
+      last.footnoteId === run.footnoteId
     ) {
       last.text += run.text;
     } else {

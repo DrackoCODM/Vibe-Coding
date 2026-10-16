@@ -212,6 +212,7 @@ export function useFileHandlers(editor: Editor | null): FileHandlers {
         headerText: settings.headerText || undefined,
         footerText: settings.footerText || undefined,
         orientation: settings.orientation,
+        footnotes: settings.footnotes,
       });
       const buffer = bytes.buffer.slice(
         bytes.byteOffset,

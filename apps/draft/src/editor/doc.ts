@@ -12,12 +12,18 @@ export interface CommentItem {
   resolved?: boolean;
 }
 
+export interface FootnoteNote {
+  id: string;
+  text: string;
+}
+
 export interface DocSettings {
   orientation: PageOrientation;
   columns: 1 | 2 | 3;
   watermarkText: string;
   headerText: string;
   footerText: string;
+  footnotes: FootnoteNote[];
   comments: CommentItem[];
 }
 
@@ -27,6 +33,7 @@ export const DEFAULT_DOC_SETTINGS: DocSettings = {
   watermarkText: '',
   headerText: '',
   footerText: '',
+  footnotes: [],
   comments: [],
 };
 
@@ -43,6 +50,7 @@ export const GratisDoc = Document.extend({
       watermarkText: { default: DEFAULT_DOC_SETTINGS.watermarkText },
       headerText: { default: DEFAULT_DOC_SETTINGS.headerText },
       footerText: { default: DEFAULT_DOC_SETTINGS.footerText },
+      footnotes: { default: DEFAULT_DOC_SETTINGS.footnotes },
       comments: { default: DEFAULT_DOC_SETTINGS.comments },
     };
   },
@@ -57,6 +65,7 @@ export function readDocSettings(doc: { attrs: Record<string, unknown> }): DocSet
     watermarkText: typeof attrs.watermarkText === 'string' ? attrs.watermarkText : '',
     headerText: typeof attrs.headerText === 'string' ? attrs.headerText : '',
     footerText: typeof attrs.footerText === 'string' ? attrs.footerText : '',
+    footnotes: Array.isArray(attrs.footnotes) ? (attrs.footnotes as FootnoteNote[]) : [],
     comments: Array.isArray(attrs.comments) ? (attrs.comments as CommentItem[]) : [],
   };
 }

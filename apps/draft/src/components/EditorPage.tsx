@@ -17,6 +17,7 @@ export interface EditorPageProps {
   watermarkText?: string;
   headerText?: string;
   footerText?: string;
+  footnotes?: { id: string; text: string }[];
   onPageChange?: (current: number, total: number) => void;
 }
 
@@ -30,6 +31,7 @@ export function EditorPage({
   watermarkText = '',
   headerText = '',
   footerText = '',
+  footnotes = [],
   onPageChange,
 }: EditorPageProps) {
   const base = PAGE_SIZES[pageSize];
@@ -52,6 +54,7 @@ export function EditorPage({
   const [, setTick] = useState(0);
   const [contentHeightPx, setContentHeightPx] = useState(0);
   const [breakOffsets, setBreakOffsets] = useState<number[]>([]);
+  const [footnoteRefs, setFootnoteRefs] = useState<{ noteId: string; y: number }[]>([]);
   const layout = useMemo(
     () => computePageLayout(contentHeightPx, usableHeightPx, breakOffsets),
     [contentHeightPx, usableHeightPx, breakOffsets],
@@ -81,6 +84,17 @@ export function EditorPage({
           : [];
         const stable =
           prev.length === next.length && prev.every((v, i) => Math.abs(v - next[i]) < 1);
+        return stable ? prev : next;
+      });
+      const refs = content.querySelectorAll('sup[data-footnote-id]');
+      setFootnoteRefs((prev) => {
+        const next = Array.from(refs).map((el) => ({
+          noteId: (el as HTMLElement).getAttribute('data-footnote-id') ?? '',
+          y: (el as HTMLElement).offsetTop,
+        }));
+        const stable =
+          prev.length === next.length &&
+          prev.every((p, i) => p.noteId === next[i].noteId && Math.abs(p.y - next[i].y) < 1);
         return stable ? prev : next;
       });
     };
@@ -128,6 +142,32 @@ export function EditorPage({
   const showHeader = headerText.trim().length > 0;
   const showFooter = footerText.trim().length > 0;
   const pages = Array.from({ length: pageCount }, (_, i) => i);
+  const notesText = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const note of footnotes) map.set(note.id, note.text);
+    return map;
+  }, [footnotes]);
+  const notesOnPage = useMemo(
+    () =>
+      pages.map((page) => {
+        const start = layout.pageStartsPx[page];
+        const end = start + usableHeightPx;
+        const seen = new Set<string>();
+        const list: { noteId: string; number: number; text: string }[] = [];
+        footnoteRefs.forEach((ref, index) => {
+          if (ref.y < start || ref.y >= end) return;
+          if (seen.has(ref.noteId)) return;
+          seen.add(ref.noteId);
+          list.push({
+            noteId: ref.noteId,
+            number: index + 1,
+            text: notesText.get(ref.noteId) ?? '',
+          });
+        });
+        return list;
+      }),
+    [pages, layout.pageStartsPx, usableHeightPx, footnoteRefs, notesText],
+  );
 
   return (
     <div
@@ -154,6 +194,30 @@ export function EditorPage({
           marginLeft: (pageWidthPx * zoom - pageWidthPx) / 2 / zoom,
         }}
       >
+        {notesOnPage.map(
+          (list, i) =>
+            list.length > 0 && (
+              <div
+                key={`notes-${i}`}
+                data-testid={i === 0 ? 'footnote-strip' : undefined}
+                aria-label={`Footnotes page ${i + 1}`}
+                className="footnote-strip pointer-events-none absolute select-none text-2xs leading-relaxed text-ink/80"
+                style={{
+                  bottom: sheetHeightPx - (i + 1) * pageHeightPx + footerOffsetPx + 18,
+                  left: margin.left,
+                  width: usableWidthPx,
+                  borderTop: '1px dotted rgb(0 0 0 / 0.25)',
+                  paddingTop: 4,
+                }}
+              >
+                {list.map((note) => (
+                  <div key={note.noteId} className="footnote-item">
+                    {note.text}
+                  </div>
+                ))}
+              </div>
+            ),
+        )}
         {pages.map((i) => (
           <span key={`hf-${i}`}>
             {showHeader && (

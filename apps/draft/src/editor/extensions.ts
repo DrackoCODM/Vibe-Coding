@@ -8,6 +8,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import { TextStyleKit } from '@tiptap/extension-text-style/text-style-kit';
 import StarterKit from '@tiptap/starter-kit';
 import { GratisDoc } from './doc';
+import { FootnoteRef } from './footnotes';
 import { ImageWithAlign } from './images';
 import { PageBreak } from './pageBreak';
 import {
@@ -26,6 +27,7 @@ export function getEditorExtensions(): Extensions {
     }),
     GratisDoc,
     PageBreak,
+    FootnoteRef,
     TextStyleKit,
     Highlight.configure({ multicolor: true }),
     TextAlign.configure({ types: ['heading', 'paragraph'] }),

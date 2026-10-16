@@ -212,6 +212,30 @@
   cursor: col-resize;
 }
 
+.ProseMirror {
+  counter-reset: gdfn 0;
+}
+
+sup[data-footnote-id] {
+  counter-increment: gdfn;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+sup[data-footnote-id]::after {
+  content: counter(gdfn);
+}
+
+.footnote-strip {
+  counter-reset: gdfn-strip 0;
+}
+
+.footnote-strip .footnote-item::before {
+  counter-increment: gdfn-strip;
+  content: counter(gdfn-strip) '. ';
+  font-weight: 600;
+}
+
 .page-break-node {
   display: block;
   height: 1.5em;

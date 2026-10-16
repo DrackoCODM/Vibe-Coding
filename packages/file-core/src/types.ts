@@ -18,6 +18,8 @@ export interface TextRun {
   underline?: boolean;
   strike?: boolean;
   code?: boolean;
+  /** Marks the run as a footnote reference pointing at this note id. */
+  footnoteId?: string;
 }
 
 export type ExportBlock =

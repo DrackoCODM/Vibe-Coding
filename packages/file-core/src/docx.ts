@@ -3,6 +3,7 @@ import {
   BorderStyle,
   Document,
   Footer,
+  FootnoteReferenceRun,
   Header,
   HeadingLevel,
   PageBreak,
@@ -18,6 +19,8 @@ export interface DocxExportOptions {
   headerText?: string;
   footerText?: string;
   orientation?: 'portrait' | 'landscape';
+  /** Notes referenced by footnoteId on runs; numbered by first-encounter order. */
+  footnotes?: { id: string; text: string }[];
 }
 
 /** Convert a .docx file (ArrayBuffer) to an HTML fragment. */
@@ -29,20 +32,6 @@ export async function docxToHtml(buffer: ArrayBuffer): Promise<string> {
   ) as Parameters<typeof mammoth.convertToHtml>[0];
   const result = await mammoth.convertToHtml(input);
   return result.value;
-}
-
-function toDocxRuns(runs: BlockRun[]): TextRun[] {
-  return runs.map(
-    (run) =>
-      new TextRun({
-        text: run.text,
-        bold: run.bold,
-        italics: run.italic,
-        underline: run.underline ? {} : undefined,
-        strike: run.strike,
-        font: 'Calibri',
-      }),
-  );
 }
 
 type HeadingLevelValue = (typeof HeadingLevel)[keyof typeof HeadingLevel];
@@ -65,6 +54,36 @@ export async function blocksToDocx(
   blocks: ExportBlock[],
   options: DocxExportOptions = {},
 ): Promise<Uint8Array> {
+  const footnoteNumberById = new Map<string, number>();
+  for (const block of blocks) {
+    if (
+      block.type === 'heading' ||
+      block.type === 'paragraph' ||
+      block.type === 'listItem' ||
+      block.type === 'blockquote'
+    ) {
+      for (const run of block.runs) {
+        if (run.footnoteId && !footnoteNumberById.has(run.footnoteId)) {
+          footnoteNumberById.set(run.footnoteId, footnoteNumberById.size + 1);
+        }
+      }
+    }
+  }
+  const toDocxRun = (run: BlockRun): TextRun | FootnoteReferenceRun => {
+    if (run.footnoteId) {
+      const number = footnoteNumberById.get(run.footnoteId) ?? footnoteNumberById.size + 1;
+      return new FootnoteReferenceRun(number);
+    }
+    return new TextRun({
+      text: run.text,
+      bold: run.bold,
+      italics: run.italic,
+      underline: run.underline ? {} : undefined,
+      strike: run.strike,
+      font: 'Calibri',
+    });
+  };
+
   const children: Paragraph[] = [];
   for (const block of blocks) {
     switch (block.type) {
@@ -72,17 +91,17 @@ export async function blocksToDocx(
         children.push(
           new Paragraph({
             heading: headingLevelFor(block.level),
-            children: toDocxRuns(block.runs),
+            children: block.runs.map(toDocxRun),
           }),
         );
         break;
       case 'paragraph':
-        children.push(new Paragraph({ children: toDocxRuns(block.runs) }));
+        children.push(new Paragraph({ children: block.runs.map(toDocxRun) }));
         break;
       case 'listItem':
         children.push(
           new Paragraph({
-            children: toDocxRuns(block.runs),
+            children: block.runs.map(toDocxRun),
             bullet: { level: Math.min(block.level, 8) },
           }),
         );
@@ -90,7 +109,7 @@ export async function blocksToDocx(
       case 'blockquote':
         children.push(
           new Paragraph({
-            children: toDocxRuns(block.runs).map((run) => run),
+            children: block.runs.map(toDocxRun),
             indent: { left: 720 },
           }),
         );
@@ -133,6 +152,16 @@ export async function blocksToDocx(
       ? { footers: { default: new Footer({ children: [textParagraph(options.footerText)] }) } }
       : {}),
   };
-  const doc = new Document({ sections: [section] });
+  const footnotes: Record<string, { children: Paragraph[] }> = {};
+  for (const [id, number] of footnoteNumberById) {
+    const text = options.footnotes?.find((note) => note.id === id)?.text ?? '';
+    footnotes[String(number)] = {
+      children: [new Paragraph({ children: [new TextRun({ text, font: 'Calibri' })] })],
+    };
+  }
+  const doc = new Document({
+    sections: [section],
+    ...(Object.keys(footnotes).length > 0 ? { footnotes } : {}),
+  });
   return Packer.toBuffer(doc);
 }

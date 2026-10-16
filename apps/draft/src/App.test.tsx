@@ -58,6 +58,23 @@ describe('App shell', () => {
     expect(screen.queryByTestId('header-footer-dialog')).toBeNull();
   });
 
+  it('adds a footnote and edits its note in the footnotes dialog', async () => {
+    const { container } = render(<App />);
+    await screen.findByRole('textbox', { name: 'Document content' });
+    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Add footnote'));
+    expect(container.querySelector('sup[data-footnote-id]')).toBeTruthy();
+    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Footnotes…'));
+    expect(screen.getByRole('dialog', { name: 'Footnotes' })).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Footnote 1 text'), { target: { value: 'My note' } });
+    fireEvent.click(screen.getByText('Apply'));
+    await waitFor(() => {
+      expect(screen.getByTestId('footnote-strip').textContent).toContain('My note');
+    });
+    expect(screen.queryByTestId('footnotes-dialog')).toBeNull();
+  });
+
   it('defaults to dark theme and toggles the dark class on the html element', () => {
     localStorage.removeItem('gratisdraft.theme');
     render(<App />);

@@ -7,6 +7,7 @@ import {
   FilePlus,
   FileText,
   FolderOpen,
+  ListEnd,
   Moon,
   PanelTop,
   Printer,
@@ -15,12 +16,14 @@ import {
   Save,
   SaveAll,
   Search,
+  Subscript as SubscriptIcon,
   Sun,
   Undo2,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { EditorPage } from './components/EditorPage';
 import { FindBar } from './components/FindBar';
+import { FootnotesDialog } from './components/FootnotesDialog';
 import { HeaderFooterDialog } from './components/HeaderFooterDialog';
 import { MenuBar } from './components/MenuBar';
 import { PageSetupBar, type PageSetup } from './components/PageSetupBar';
@@ -96,6 +99,7 @@ export function App() {
   const [findOpen, setFindOpen] = useState(false);
   const [findReplaceOpen, setFindReplaceOpen] = useState(false);
   const [headerFooterOpen, setHeaderFooterOpen] = useState(false);
+  const [footnotesOpen, setFootnotesOpen] = useState(false);
   const [stats, setStats] = useState<WordStats>({
     words: 0,
     characters: 0,
@@ -257,6 +261,16 @@ export function App() {
           onSelect: () => setHeaderFooterOpen(true),
         },
         {
+          label: 'Add footnote',
+          icon: <SubscriptIcon {...menuIconProps} />,
+          onSelect: () => editor?.commands.addFootnote(),
+        },
+        {
+          label: 'Footnotes…',
+          icon: <ListEnd {...menuIconProps} />,
+          onSelect: () => setFootnotesOpen(true),
+        },
+        {
           label: 'Find',
           shortcut: 'Ctrl+F',
           icon: <Search {...menuIconProps} />,
@@ -343,6 +357,7 @@ export function App() {
           watermarkText={docSettings.watermarkText}
           headerText={docSettings.headerText}
           footerText={docSettings.footerText}
+          footnotes={docSettings.footnotes}
           onPageChange={handlePageChange}
         />
       </main>
@@ -361,6 +376,15 @@ export function App() {
           setHeaderFooterOpen(false);
         }}
         onClose={() => setHeaderFooterOpen(false)}
+      />
+      <FootnotesDialog
+        editor={editor}
+        open={footnotesOpen}
+        footnotes={docSettings.footnotes}
+        onApply={(items) => {
+          if (editor) updateDocSettings(editor, { footnotes: items });
+        }}
+        onClose={() => setFootnotesOpen(false)}
       />
     </div>
   );

@@ -208,6 +208,51 @@ describe('pmJsonToBlocks', () => {
     const blocks = pmJsonToBlocks(doc);
     expect(blocks[0]).toMatchObject({ type: 'listItem', ordered: false, level: 0 });
   });
+
+  it('converts footnote references to footnote runs', () => {
+    const doc: PmNodeLike = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Text ' },
+            { type: 'footnoteRef', attrs: { noteId: 'fn-1' } },
+            { type: 'text', text: 'more' },
+          ],
+        },
+      ],
+    };
+    const blocks = pmJsonToBlocks(doc);
+    expect(blocks).toEqual([
+      {
+        type: 'paragraph',
+        runs: [
+          { text: 'Text ', bold: false, italic: false, underline: false, strike: false, code: false },
+          { text: '', footnoteId: 'fn-1' },
+          { text: 'more', bold: false, italic: false, underline: false, strike: false, code: false },
+        ],
+      },
+    ]);
+  });
+});
+
+describe('docx footnotes', () => {
+  it('exports footnote references with note text', async () => {
+    const bytes = await blocksToDocx(
+      [
+        {
+          type: 'paragraph',
+          runs: [{ text: 'Text', footnoteId: 'fn-1' }],
+        },
+      ],
+      { footnotes: [{ id: 'fn-1', text: 'The note body' }] },
+    );
+    const footnotesXml = readZipEntry(bytes, 'word/footnotes.xml');
+    const documentXml = readZipEntry(bytes, 'word/document.xml');
+    expect(footnotesXml).toContain('The note body');
+    expect(documentXml).toContain('footnoteReference');
+  });
 });
 
 describe('file detection', () => {
