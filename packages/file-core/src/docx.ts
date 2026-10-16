@@ -55,6 +55,7 @@ export async function blocksToDocx(
   options: DocxExportOptions = {},
 ): Promise<Uint8Array> {
   const footnoteNumberById = new Map<string, number>();
+  const numbering: Record<string, number> = {};
   for (const block of blocks) {
     if (
       block.type === 'heading' ||
@@ -98,6 +99,16 @@ export async function blocksToDocx(
       case 'paragraph':
         children.push(new Paragraph({ children: block.runs.map(toDocxRun) }));
         break;
+      case 'caption': {
+        const n = (numbering[block.label] ?? 0) + 1;
+        numbering[block.label] = n;
+        const captionRuns = [
+          new TextRun({ text: `${block.label} ${n}: `, italics: true, font: 'Calibri' }),
+          ...block.runs.map(toDocxRun),
+        ];
+        children.push(new Paragraph({ children: captionRuns }));
+        break;
+      }
       case 'listItem':
         children.push(
           new Paragraph({

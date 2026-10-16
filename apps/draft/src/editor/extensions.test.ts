@@ -7,6 +7,8 @@ import { DEFAULT_DOC_SETTINGS, readDocSettings, updateDocSettings } from './doc'
 import { CommentMark, removeComment } from './comments';
 import { removeFootnote } from './footnotes';
 import { collectHeadings } from './toc';
+import { findBookmarks } from './bookmarks';
+import { findCaptions } from './captions';
 import { STYLE_PRESETS } from './styles';
 import { getEditorExtensions } from './extensions';
 
@@ -387,5 +389,33 @@ describe('document settings', () => {
     const task = findPreset('task-list');
     task.apply(ed);
     expect(ed.isActive('taskList')).toBe(true);
+  });
+
+  it('inserts figure and table captions with unique ids', () => {
+    const ed = createEditor('<p>Hello world</p>');
+    expect(ed.chain().insertCaption('Figure').run()).toBe(true);
+    expect(ed.chain().insertCaption('Table').run()).toBe(true);
+    const captions = findCaptions(ed.state.doc);
+    expect(captions).toHaveLength(2);
+    expect(captions.map((c) => c.label)).toEqual(['Figure', 'Table']);
+    expect(captions[0].cid).toMatch(/^cap-/);
+    expect(captions[1].cid).toMatch(/^cap-/);
+    expect(ed.getHTML()).toContain('data-caption');
+  });
+
+  it('inserts bookmarks and cross-references that update labels', () => {
+    const ed = createEditor('<p>Hello world</p>');
+    expect(ed.chain().insertBookmark().run()).toBe(true);
+    const bookmarks = findBookmarks(ed.state.doc);
+    expect(bookmarks).toHaveLength(1);
+    expect(bookmarks[0].refLabel).toBe('bm1');
+    expect(ed.chain().insertCrossRef('bookmark', bookmarks[0].bookmarkId).run()).toBe(true);
+    const xrefs: ProsemirrorNode[] = [];
+    ed.state.doc.descendants((node) => {
+      if (node.type.name === 'crossRef') xrefs.push(node);
+    });
+    expect(xrefs).toHaveLength(1);
+    expect(xrefs[0].attrs.refLabel).toBe('bm1');
+    expect(ed.getHTML()).toContain('data-xref');
   });
 });

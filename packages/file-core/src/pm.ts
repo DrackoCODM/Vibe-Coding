@@ -20,6 +20,17 @@ function collectRuns(node: PmNodeLike, marks: Set<string> = new Set()): TextRun[
       { text: '', footnoteId: typeof node.attrs?.noteId === 'string' ? node.attrs.noteId : '' },
     ];
   }
+  if (node.type === 'bookmark') {
+    return [];
+  }
+  if (node.type === 'crossRef') {
+    return [
+      {
+        text: typeof node.attrs?.refLabel === 'string' ? node.attrs.refLabel : '',
+        underline: true,
+      },
+    ];
+  }
   return (node.content ?? []).flatMap((child) => collectRuns(child, nextMarks));
 }
 
@@ -98,6 +109,11 @@ function convertNode(
     case 'pageBreak':
       out.push({ type: 'pageBreak' });
       break;
+    case 'caption': {
+      const label = typeof node.attrs?.label === 'string' ? node.attrs.label : 'Figure';
+      out.push({ type: 'caption', label, runs: joinRuns(collectRuns(node)) });
+      break;
+    }
     case 'table':
       for (const row of node.content ?? []) {
         if (row.type !== 'tableRow') continue;

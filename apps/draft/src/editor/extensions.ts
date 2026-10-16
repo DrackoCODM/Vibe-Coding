@@ -7,6 +7,8 @@ import TaskList from '@tiptap/extension-task-list';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyleKit } from '@tiptap/extension-text-style/text-style-kit';
 import StarterKit from '@tiptap/starter-kit';
+import { Bookmark, CrossRef } from './bookmarks';
+import { Caption } from './captions';
 import { CommentMark } from './comments';
 import { GratisDoc } from './doc';
 import { TableOfContents } from './toc';
@@ -36,6 +38,9 @@ export function getEditorExtensions(): Extensions {
     Subscript,
     Superscript,
     CommentMark,
+    Bookmark,
+    CrossRef,
+    Caption,
     TableOfContents,
     TaskList,
     TaskItem.configure({ nested: true }),

@@ -269,6 +269,74 @@ describe('docx footnotes', () => {
   });
 });
 
+describe('captions and cross-references', () => {
+  it('converts captions and cross-references to blocks', () => {
+    const doc: PmNodeLike = {
+      type: 'doc',
+      content: [
+        {
+          type: 'caption',
+          attrs: { label: 'Figure', cid: 'cap-1' },
+          content: [{ type: 'text', text: 'Project diagram' }],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'As shown in ' },
+            {
+              type: 'crossRef',
+              attrs: { refType: 'figure', refId: 'cap-1', refLabel: 'Figure 1' },
+            },
+          ],
+        },
+      ],
+    };
+    const blocks = pmJsonToBlocks(doc);
+    expect(blocks).toEqual([
+      {
+        type: 'caption',
+        label: 'Figure',
+        runs: [
+          {
+            text: 'Project diagram',
+            bold: false,
+            italic: false,
+            underline: false,
+            strike: false,
+            code: false,
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        runs: [
+          {
+            text: 'As shown in ',
+            bold: false,
+            italic: false,
+            underline: false,
+            strike: false,
+            code: false,
+          },
+          { text: 'Figure 1', underline: true },
+        ],
+      },
+    ]);
+  });
+
+  it('numbers captions per label in the docx export', async () => {
+    const bytes = await blocksToDocx([
+      { type: 'caption', label: 'Figure', runs: [{ text: 'First figure', italic: true }] },
+      { type: 'caption', label: 'Table', runs: [{ text: 'First table' }] },
+      { type: 'caption', label: 'Figure', runs: [{ text: 'Second figure' }] },
+    ]);
+    const xml = readZipEntry(bytes, 'word/document.xml');
+    expect(xml).toContain('Figure 1: ');
+    expect(xml).toContain('Table 1: ');
+    expect(xml).toContain('Figure 2: ');
+  });
+});
+
 describe('file detection', () => {
   it('detects supported formats', () => {
     expect(detectImportFormat('a.gdraft')).toBe('gdraft');

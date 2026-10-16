@@ -106,6 +106,25 @@ describe('App shell', () => {
     expect(screen.queryByTestId('character-dialog')).toBeNull();
   });
 
+  it('shows an empty cross-reference dialog', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Cross-reference…'));
+    expect(screen.getByTestId('crossref-dialog')).toBeTruthy();
+    expect(screen.getByTestId('crossref-dialog').textContent).toContain(
+      'No bookmarks or captions yet',
+    );
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(screen.queryByTestId('crossref-dialog')).toBeNull();
+  });
+
+  it('inserts a caption from the Edit menu', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByText('Edit'));
+    fireEvent.click(screen.getByText('Figure caption'));
+    expect(screen.getByLabelText('Document content').querySelector('[data-caption]')).toBeTruthy();
+  });
+
   it('defaults to dark theme and toggles the dark class on the html element', () => {
     localStorage.removeItem('gratisdraft.theme');
     render(<App />);

@@ -213,7 +213,50 @@
 }
 
 .ProseMirror {
-  counter-reset: gdfn 0;
+  counter-reset: gdfn 0 gdfig 0 gdtbl 0;
+}
+
+.gd-caption {
+  margin: 4px 0 10px;
+  font-size: 11px;
+  color: rgb(var(--ink));
+}
+
+.gd-caption[data-label='Figure']::before {
+  counter-increment: gdfig;
+  content: 'Figure ' counter(gdfig) ': ';
+  font-weight: 600;
+  margin-right: 2px;
+}
+
+.gd-caption[data-label='Table']::before {
+  counter-increment: gdtbl;
+  content: 'Table ' counter(gdtbl) ': ';
+  font-weight: 600;
+  margin-right: 2px;
+}
+
+.gd-bookmark {
+  font-size: 10px;
+  color: rgb(var(--faint));
+  border: 1px solid rgb(var(--line));
+  border-radius: 4px;
+  padding: 0 3px;
+  margin: 0 1px;
+  vertical-align: 1px;
+}
+
+.gd-xref {
+  color: rgb(var(--accent));
+  border-bottom: 1px dotted rgb(var(--accent));
+  text-decoration: none;
+  cursor: pointer;
+}
+
+@media print {
+  .gd-bookmark {
+    display: none;
+  }
 }
 
 .gd-comment {

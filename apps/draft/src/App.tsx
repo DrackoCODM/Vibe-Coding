@@ -4,11 +4,14 @@ import { useEditor } from '@tiptap/react';
 import type { EditorView } from '@tiptap/pm/view';
 import {
   Bold,
+  Bookmark,
   FileDown,
   FilePlus,
   FileText,
   FolderOpen,
+  Image as ImageIcon,
   Italic,
+  Link2,
   ListEnd,
   ListTree,
   MessageSquare,
@@ -22,6 +25,7 @@ import {
   Search,
   Subscript as SubscriptIcon,
   Sun,
+  Table as TableIcon,
   Type,
   Underline,
   Undo2,
@@ -31,6 +35,7 @@ import { EditorPage } from './components/EditorPage';
 import { FindBar } from './components/FindBar';
 import { CommentsDialog } from './components/CommentsDialog';
 import { CharacterDialog } from './components/CharacterDialog';
+import { CrossRefDialog } from './components/CrossRefDialog';
 import { FootnotesDialog } from './components/FootnotesDialog';
 import { HeaderFooterDialog } from './components/HeaderFooterDialog';
 import { MenuBar } from './components/MenuBar';
@@ -40,6 +45,7 @@ import { StatusBar } from './components/StatusBar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Toolbar } from './components/Toolbar';
 import { getEditorExtensions } from './editor/extensions';
+import { updateCrossRefs } from './editor/bookmarks';
 import {
   DEFAULT_DOC_SETTINGS,
   readDocSettings,
@@ -110,6 +116,7 @@ export function App() {
   const [footnotesOpen, setFootnotesOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [characterOpen, setCharacterOpen] = useState(false);
+  const [crossRefOpen, setCrossRefOpen] = useState(false);
   const [stats, setStats] = useState<WordStats>({
     words: 0,
     characters: 0,
@@ -148,14 +155,16 @@ export function App() {
 
   useEffect(() => {
     if (!editor) return;
-    // Keeps ToC blocks in sync; dispatches only when entries are stale.
-    const updateTocs = () => {
+    // Keeps ToC blocks and cross-reference labels in sync; dispatches only
+    // when their cached data is stale, so this cannot loop.
+    const updateDerived = () => {
       editor.commands.updateTableOfContents();
+      updateCrossRefs(editor);
     };
-    updateTocs();
-    editor.on('update', updateTocs);
+    updateDerived();
+    editor.on('update', updateDerived);
     return () => {
-      editor.off('update', updateTocs);
+      editor.off('update', updateDerived);
     };
   }, [editor]);
 
@@ -302,6 +311,26 @@ export function App() {
           label: 'Table of contents',
           icon: <ListTree {...menuIconProps} />,
           onSelect: () => editor?.commands.insertTableOfContents(),
+        },
+        {
+          label: 'Figure caption',
+          icon: <ImageIcon {...menuIconProps} />,
+          onSelect: () => editor?.chain().focus().insertCaption('Figure').run(),
+        },
+        {
+          label: 'Table caption',
+          icon: <TableIcon {...menuIconProps} />,
+          onSelect: () => editor?.chain().focus().insertCaption('Table').run(),
+        },
+        {
+          label: 'Bookmark',
+          icon: <Bookmark {...menuIconProps} />,
+          onSelect: () => editor?.chain().focus().insertBookmark().run(),
+        },
+        {
+          label: 'Cross-reference…',
+          icon: <Link2 {...menuIconProps} />,
+          onSelect: () => setCrossRefOpen(true),
         },
         {
           label: 'Find',
@@ -461,6 +490,7 @@ export function App() {
         open={characterOpen}
         onClose={() => setCharacterOpen(false)}
       />
+      <CrossRefDialog editor={editor} open={crossRefOpen} onClose={() => setCrossRefOpen(false)} />
     </div>
   );
 }
