@@ -89,6 +89,9 @@ function convertNode(
     case 'horizontalRule':
       out.push({ type: 'horizontalRule' });
       break;
+    case 'pageBreak':
+      out.push({ type: 'pageBreak' });
+      break;
     case 'table':
       for (const row of node.content ?? []) {
         if (row.type !== 'tableRow') continue;

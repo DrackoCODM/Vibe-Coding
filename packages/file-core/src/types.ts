@@ -25,6 +25,7 @@ export type ExportBlock =
   | { type: 'paragraph'; runs: TextRun[] }
   | { type: 'listItem'; ordered: boolean; level: number; runs: TextRun[] }
   | { type: 'blockquote'; runs: TextRun[] }
+  | { type: 'pageBreak' }
   | { type: 'horizontalRule' }
   | { type: 'tableRow'; cells: string[][] };
 

@@ -212,6 +212,32 @@
   cursor: col-resize;
 }
 
+.page-break-node {
+  display: block;
+  height: 1.5em;
+  position: relative;
+  margin: 0.5em 0;
+}
+
+.page-break-node::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  border-top: 2px dashed rgba(59, 130, 246, 0.5);
+}
+
+@media print {
+  .page-break-node {
+    height: 0;
+    margin: 0;
+  }
+
+  .page-break-node::after {
+    display: none !important;
+  }
+}
+
 @media print {
   header,
   [aria-label='Formatting'],

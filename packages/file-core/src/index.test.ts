@@ -88,6 +88,16 @@ describe('docx', () => {
     expect(bytes[1]).toBe(0x4b);
   });
 
+  it('exports page breaks as explicit breaks', async () => {
+    const bytes = await blocksToDocx([
+      { type: 'paragraph', runs: [{ text: 'Page one' }] },
+      { type: 'pageBreak' },
+      { type: 'paragraph', runs: [{ text: 'Page two' }] },
+    ]);
+    expect(bytes.byteLength).toBeGreaterThan(100);
+    expect(bytes[0]).toBe(0x50);
+  });
+
   it('imports a docx fixture to html', async () => {
     const fixture = new Document({
       sections: [

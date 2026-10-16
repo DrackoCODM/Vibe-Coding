@@ -9,6 +9,7 @@ import { TextStyleKit } from '@tiptap/extension-text-style/text-style-kit';
 import StarterKit from '@tiptap/starter-kit';
 import { GratisDoc } from './doc';
 import { ImageWithAlign } from './images';
+import { PageBreak } from './pageBreak';
 import {
   TableCellWithShading,
   TableHeaderWithShading,
@@ -24,6 +25,7 @@ export function getEditorExtensions(): Extensions {
       link: { openOnClick: false },
     }),
     GratisDoc,
+    PageBreak,
     TextStyleKit,
     Highlight.configure({ multicolor: true }),
     TextAlign.configure({ types: ['heading', 'paragraph'] }),

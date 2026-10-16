@@ -229,4 +229,11 @@ describe('document settings', () => {
       restored.destroy();
     }
   });
+
+  it('inserts a manual page break node', () => {
+    const ed = createEditor();
+    ed.commands.setPageBreak();
+    expect(ed.getJSON().content?.some((n) => n.type === 'pageBreak')).toBe(true);
+    expect(ed.getHTML()).toContain('data-page-break');
+  });
 });

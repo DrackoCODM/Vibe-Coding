@@ -1,5 +1,5 @@
 import mammoth from 'mammoth';
-import { BorderStyle, Document, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
+import { BorderStyle, Document, HeadingLevel, Packer, PageBreak, Paragraph, TextRun } from 'docx';
 import type { ExportBlock, TextRun as BlockRun } from './types';
 
 /** Convert a .docx file (ArrayBuffer) to an HTML fragment. */
@@ -73,6 +73,9 @@ export async function blocksToDocx(blocks: ExportBlock[]): Promise<Uint8Array> {
             indent: { left: 720 },
           }),
         );
+        break;
+      case 'pageBreak':
+        children.push(new Paragraph({ children: [new PageBreak()] }));
         break;
       case 'horizontalRule':
         children.push(

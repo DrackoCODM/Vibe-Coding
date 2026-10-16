@@ -23,6 +23,7 @@ import {
   Quote,
   Redo2,
   Rows3,
+  SeparatorHorizontal,
   Split,
   Strikethrough,
   Subscript,
@@ -381,6 +382,13 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor?.chain().focus().setHorizontalRule().run()}
       >
         <Minus {...iconProps} />
+      </ToolbarButton>
+      <ToolbarButton
+        aria-label="Insert page break"
+        disabled={disabled}
+        onClick={() => editor?.chain().focus().setPageBreak().run()}
+      >
+        <SeparatorHorizontal {...iconProps} />
       </ToolbarButton>
       <ToolbarSeparator />
 

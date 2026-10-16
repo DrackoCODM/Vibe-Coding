@@ -1,10 +1,10 @@
 import type { Editor } from '@tiptap/react';
 import { EditorContent } from '@tiptap/react';
 import { mmToPx, PAGE_SIZES } from '@gratis/shared';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { PageOrientation } from '../editor/doc';
 import type { Margins } from '../page/margins';
-import { computePageCount, pageForOffset } from '../page/pagination';
+import { computePageLayout, pageForLayout } from '../page/pagination';
 
 export interface EditorPageProps {
   editor: Editor | null;
@@ -46,7 +46,12 @@ export function EditorPage({
 
   const [, setTick] = useState(0);
   const [contentHeightPx, setContentHeightPx] = useState(0);
-  const pageCount = computePageCount(contentHeightPx, usableHeightPx);
+  const [breakOffsets, setBreakOffsets] = useState<number[]>([]);
+  const layout = useMemo(
+    () => computePageLayout(contentHeightPx, usableHeightPx, breakOffsets),
+    [contentHeightPx, usableHeightPx, breakOffsets],
+  );
+  const pageCount = layout.pageCount;
 
   useEffect(() => {
     if (!editor) return;
@@ -60,7 +65,20 @@ export function EditorPage({
   useEffect(() => {
     const content = editor?.view.dom;
     if (!content) return;
-    const measure = () => setContentHeightPx(content.scrollHeight);
+    const measure = () => {
+      setContentHeightPx(content.scrollHeight);
+      const breaks = content.parentElement?.querySelectorAll('[data-page-break]');
+      setBreakOffsets((prev) => {
+        const next = breaks
+          ? Array.from(breaks).map(
+              (el) => (el as HTMLElement).offsetTop + (el as HTMLElement).offsetHeight,
+            )
+          : [];
+        const stable =
+          prev.length === next.length && prev.every((v, i) => Math.abs(v - next[i]) < 1);
+        return stable ? prev : next;
+      });
+    };
     measure();
     const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
     observer?.observe(content);
@@ -78,7 +96,7 @@ export function EditorPage({
         const coords = editor.view.coordsAtPos(editor.state.selection.from);
         const contentTop = editor.view.dom.getBoundingClientRect().top;
         const y = coords.top - contentTop;
-        onPageChange(pageForOffset(y, usableHeightPx, pageCount), pageCount);
+        onPageChange(pageForLayout(y, layout.pageStartsPx), pageCount);
       } catch {
         onPageChange(1, pageCount);
       }
@@ -90,15 +108,15 @@ export function EditorPage({
       editor.off('selectionUpdate', report);
       editor.off('update', report);
     };
-  }, [editor, onPageChange, usableHeightPx, pageCount]);
+  }, [editor, onPageChange, usableHeightPx, pageCount, layout.pageStartsPx]);
 
   const sheetHeightPx = Math.max(pageHeightPx, pageCount * pageHeightPx);
-  const breakLines = Array.from(
-    { length: Math.max(0, pageCount - 1) },
-    (_, i) => (i + 1) * usableHeightPx,
-  );
+  const breakLines = layout.naturalBoundariesPx;
   const watermarks = watermarkText
-    ? Array.from({ length: pageCount }, (_, i) => margin.top + (i + 0.5) * usableHeightPx)
+    ? Array.from(
+        { length: pageCount },
+        (_, i) => margin.top + layout.pageStartsPx[i] + 0.5 * usableHeightPx,
+      )
     : [];
 
   return (

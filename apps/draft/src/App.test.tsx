@@ -36,6 +36,13 @@ describe('App shell', () => {
     expect(screen.getAllByTestId('watermark')[0].textContent).toBe('DRAFT');
   });
 
+  it('inserts page breaks via the toolbar', async () => {
+    const { container } = render(<App />);
+    await screen.findByRole('textbox', { name: 'Document content' });
+    fireEvent.click(screen.getByLabelText('Insert page break'));
+    expect(container.querySelector('[data-page-break]')).toBeTruthy();
+  });
+
   it('defaults to dark theme and toggles the dark class on the html element', () => {
     localStorage.removeItem('gratisdraft.theme');
     render(<App />);
