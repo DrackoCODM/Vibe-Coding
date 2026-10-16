@@ -17,7 +17,20 @@ Development is planned in the following order. Nothing below is claimed as done 
   - [x] File save/open (.gdraft), import (md/html/txt/docx), export (docx/md/html/txt/pdf)
   - [x] Find & replace, word count, keyboard shortcuts, auto-save
   - [x] Dark/light theme, basic accessibility
-- Remaining (not done): headers/footers, footnotes, table of contents, spellcheck, higher-fidelity .docx round-trip
+- [x] Word-parity feature wave:
+  - [x] Document-level settings (orientation landscape/portrait, 1–4 columns, watermark text)
+  - [x] Manual page breaks (Ctrl/Cmd+Enter) with break-aware pagination
+  - [x] Headers and footers (dialog + per-page rendering + .docx section headers/footers)
+  - [x] Footnotes (inline references, notes panel, .docx footnotes)
+  - [x] Comments (highlight marks, resolve/delete, .gdraft persistence)
+  - [x] Table of contents (auto-generated block refreshed on every update)
+  - [x] Style presets (Title, Subtitle, Normal, Quote, Code, lists) + character formatting dialog
+  - [x] Captions (Figure/Table, auto-numbered), bookmarks and cross-references (auto-refreshed labels)
+  - [x] Inline citations [n] with auto-formatted Bibliography block
+  - [x] Menu reorganization (File/Edit/Insert/Format/View/Help) + two-tier toolbar
+  - [x] Left panel (Outline/Styles) and right panel (Comments/References)
+  - [x] Status bar: zoom slider (50–200%), Saved/Unsaved state
+- Remaining (not done): spellcheck, higher-fidelity .docx round-trip, endnotes, mail merge, track changes (P4)
 
 ## Phase 3 — Grid
 

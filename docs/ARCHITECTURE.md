@@ -21,14 +21,15 @@ tests/             reserved for cross-package tests (empty)
 
 ## Draft Application (`apps/draft/`)
 
-- `src/App.tsx` — root state (theme, page setup, find bar), keyboard shortcuts, menu definitions, word-count tracking.
-- `src/components/` — UI: `MenuBar` (dropdown menus), `Toolbar` (formatting controls), `PageSetupBar` (size/margins/zoom), `Ruler`, `EditorPage` (paginated page canvas), `FindBar`, `StatusBar`, `ThemeToggle`.
-- `src/editor/` — TipTap setup: `extensions.ts` (canonical extension list), `tables.ts`, `images.ts`, `stats.ts` (word/character counting).
-- `src/page/` — pagination math (`pagination.ts`), margin presets (`margins.ts`).
-- `src/files/` — file I/O: `io.ts` (pickers, downloads), `importContent.ts` (format detection → editor content), `useFileHandlers.ts` (save/open/export state hook, auto-save).
+- `src/App.tsx` — root state (theme, page setup, doc settings, find bar, panels, dialogs), keyboard shortcuts, menu definitions (File/Edit/Insert/Format/View/Help), derived-data effects (ToC, cross-refs, bibliography auto-refresh), word-count tracking.
+- `src/components/` — UI: `MenuBar` (dropdown menus with separators), `Toolbar` (two-tier formatting controls), `PageSetupBar` (size/margins/zoom/orientation/columns/watermark), `Ruler`, `EditorPage` (paginated page canvas with watermarks, headers/footers, footnote strips), `FindBar`, `StatusBar` (zoom slider + doc state), `ThemeToggle`.
+- `src/components/dialogs + panels` — `CharacterDialog`, `HeaderFooterDialog`, `FootnotesDialog`, `CommentsDialog`, `CrossRefDialog`, `CitationDialog`, `AboutDialog`; `LeftSidebar` (Outline/Styles), `RightSidebar` (Comments/References).
+- `src/editor/` — TipTap setup: `extensions.ts` (canonical extension list), `doc.ts` (doc-node attrs: orientation/columns/watermark/headers/footnotes/comments via `DocAttrStep`), `pageBreak.ts`, `footnotes.ts`, `comments.ts`, `captions.ts`, `bookmarks.ts` (bookmarks + cross-refs), `citations.ts` (citations + bibliography), `toc.ts`, `styles.ts` (presets), `tables.ts`, `images.ts`, `stats.ts` (word/character counting).
+- `src/page/` — pagination math (`pagination.ts`, break-aware `computePageLayout`), margin presets (`margins.ts`).
+- `src/files/` — file I/O: `io.ts` (pickers, downloads), `importContent.ts` (format detection → editor content), `useFileHandlers.ts` (save/open/export state hook, auto-save; .docx export passes header/footer/orientation/footnotes).
 - `src/find/` — `findReplace.ts`: match finding over ProseMirror text nodes, navigation, replace.
 
-Key technologies: TipTap v3 with StarterKit, TextStyleKit, tables, image (with resize), custom find/replace (no third-party search extension). File formats handled by `@gratis/file-core` using marked/turndown (Markdown), mammoth (docx→HTML), docx (HTML blocks→docx).
+Key technologies: TipTap v3 with StarterKit (custom `GratisDoc` doc-attrs), TextStyleKit, tables, image (with resize), custom find/replace (no third-party search extension), CSS counters for footnote/figure/table/citation numbering. File formats handled by `@gratis/file-core` using marked/turndown (Markdown), mammoth (docx→HTML), docx (blocks→docx incl. headers, footers, footnotes, orientation).
 
 ## Shared Packages
 
@@ -50,3 +51,4 @@ Vitest per workspace (jsdom for UI packages). Tests cover pure logic (pagination
 - `apps/grid/`, `apps/deck/` — future applications.
 - Tauri desktop packaging for Windows.
 - Cross-package integration tests in `tests/`.
+- Track changes, mail merge, endnotes, spellcheck; higher-fidelity .docx round-trip; .docx export for comments/columns/watermarks/ToC/bibliography.
