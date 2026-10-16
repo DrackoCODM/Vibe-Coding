@@ -10,6 +10,20 @@ describe('App shell', () => {
     expect(screen.getByLabelText('Page canvas')).toBeTruthy();
     expect(screen.getByLabelText('Status bar')).toBeTruthy();
     expect(screen.getByTestId('word-count').textContent).toBe('0 words');
+    expect(screen.getByTestId('page-indicator').textContent).toBe('Page 1 of 1');
+  });
+
+  it('exposes page size, margin and zoom controls', () => {
+    render(<App />);
+    expect((screen.getByLabelText('Page size') as HTMLSelectElement).value).toBe('a4');
+    expect(screen.getByLabelText('Margin preset')).toBeTruthy();
+    expect(screen.getByLabelText('Zoom')).toBeTruthy();
+  });
+
+  it('changes the page size of the canvas', () => {
+    render(<App />);
+    fireEvent.change(screen.getByLabelText('Page size'), { target: { value: 'letter' } });
+    expect(screen.getByLabelText('Page canvas').getAttribute('data-page-size')).toBe('letter');
   });
 
   it('toggles the dark theme class on the html element', () => {

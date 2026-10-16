@@ -2,14 +2,16 @@ import type { Editor } from '@tiptap/core';
 import { DRAFT_APP_NAME } from '@gratis/shared';
 import { useEditor } from '@tiptap/react';
 import type { EditorView } from '@tiptap/pm/view';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { EditorPage } from './components/EditorPage';
 import { MenuBar } from './components/MenuBar';
+import { PageSetupBar, type PageSetup } from './components/PageSetupBar';
 import { StatusBar } from './components/StatusBar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Toolbar } from './components/Toolbar';
 import { getEditorExtensions } from './editor/extensions';
 import { imageFilesFromDataTransfer, isImageFile, readFileAsDataUrl } from './editor/images';
+import { MARGIN_PRESETS } from './page/margins';
 
 type EditorViewWithEditor = EditorView & { editor: Editor };
 
@@ -23,6 +25,12 @@ async function insertImageFiles(files: File[], insert: (src: string, alt: string
 
 export function App() {
   const [darkMode, setDarkMode] = useState(false);
+  const [pageSetup, setPageSetup] = useState<PageSetup>({
+    pageSize: 'a4',
+    marginPreset: 'normal',
+    zoomPercent: 100,
+  });
+  const [pageInfo, setPageInfo] = useState({ current: 1, total: 1 });
   const editor = useEditor({
     extensions: getEditorExtensions(),
     content: '',
@@ -48,6 +56,12 @@ export function App() {
     },
   });
 
+  const handlePageChange = useCallback((current: number, total: number) => {
+    setPageInfo((prev) =>
+      prev.current === current && prev.total === total ? prev : { current, total },
+    );
+  }, []);
+
   const toggleTheme = () => {
     setDarkMode((prev) => {
       const next = !prev;
@@ -66,10 +80,17 @@ export function App() {
         </div>
       </header>
       <Toolbar editor={editor} />
+      <PageSetupBar setup={pageSetup} onChange={setPageSetup} />
       <main className="flex-1 overflow-auto p-8">
-        <EditorPage editor={editor} />
+        <EditorPage
+          editor={editor}
+          pageSize={pageSetup.pageSize}
+          margins={MARGIN_PRESETS[pageSetup.marginPreset]}
+          zoomPercent={pageSetup.zoomPercent}
+          onPageChange={handlePageChange}
+        />
       </main>
-      <StatusBar wordCount={0} />
+      <StatusBar wordCount={0} currentPage={pageInfo.current} pageCount={pageInfo.total} />
     </div>
   );
 }
